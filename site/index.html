@@ -2360,7 +2360,7 @@ function drawOS(){
       else { g.fillStyle=hv?'#ECE9E3':'#F7F6F3'; g.fill(); g.strokeStyle='#CFCBC4'; g.lineWidth=1.5; g.stroke(); g.fillStyle='#1A1B1E'; }
       g.fillText(label,bx+(k?22:11),yy+bh/2+bf*0.36); R.push({id,x:bx,y:yy,w:bw,h:bh,act}); bx+=bw+(k?12:8); };
     if(p.open) btn(p.open[0]+' ↗','open',true,()=>openLink(p.open[1]));
-    btn('View case study →','case',!p.open,()=>openCasePage(p.id));
+    btn('View case study →','case',!p.open,()=>openBookFromMonitor(p.id));
     if(showPrev){ const px=x0+cw+60, pw=Math.min(620,x+w-px-56), ph=pw*400/640;
       g.save(); g.shadowColor='rgba(0,0,0,.14)'; g.shadowBlur=26; g.shadowOffsetY=8; g.drawImage(PREVIEW[p.id],px,y0,pw,ph); g.restore(); }
   }
@@ -2462,6 +2462,9 @@ function takeBook(k){ curBook=k; const b=BOOKS[k];
   BOOK_STATIC.forEach((g,i)=>{ g.visible=i!==k; }); folder.visible=true; }
 function openBook(k){ glowBook(-1); if(folder.visible && curBook!==k){ pendingBook=k; FOLDER.open=false; return; } // the other folder goes back first
   if(!folder.visible) takeBook(k); openFolder(); }
+// from the monitor: step away from the screen, go to the folders on the desk and open that project's folder
+function openBookFromMonitor(id){ const k=BOOKS.findIndex(b=>b.key===id); if(k<0){ openCasePage(id); return; }
+  if(active) returnToRoom(); setTimeout(()=>{ focusOn('folder'); openBook(k); },0); }
 function putBackBook(){ FOLDER.open=false; FOLDER.spread=0; goal=inspectGoal(OBJECTS.folder); renderBar(); }
 function turnFolder(d){ if(!FOLDER.open) return; const s=Math.max(0,Math.min(SPREADS.length-1,FOLDER.spread+d)); if(s!==FOLDER.spread){ FOLDER.spread=s; renderBar(); } }
 function folderClick(hit){ if(!FOLDER.open){ return; } const lx=folder.worldToLocal(hit.point.clone()).x; turnFolder(lx< -FOLD_W/2 ? -1 : 1); }
