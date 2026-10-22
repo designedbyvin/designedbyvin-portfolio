@@ -849,7 +849,9 @@ function spineTex(col,band){ return canvasTex(64,512,(g,w,h)=>{ g.fillStyle=col;
 const softDot=canvasTex(128,128,(g)=>{ const gr=g.createRadialGradient(64,64,0,64,64,64); gr.addColorStop(0,'rgba(255,255,255,1)'); gr.addColorStop(.35,'rgba(255,255,255,.4)'); gr.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=gr; g.fillRect(0,0,128,128); });
 const blobRect=canvasTex(256,256,(g)=>{ g.shadowColor='rgba(255,255,255,1)'; g.shadowBlur=34; g.shadowOffsetX=1000; g.fillStyle='#fff'; g.fillRect(70-1000,70,116,116); g.shadowBlur=12; g.fillRect(84-1000,84,88,88); });
 const blobRound=canvasTex(256,256,(g)=>{ const gr=g.createRadialGradient(128,128,0,128,128,128); gr.addColorStop(0,'rgba(255,255,255,1)'); gr.addColorStop(.45,'rgba(255,255,255,.65)'); gr.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=gr; g.fillRect(0,0,256,256); });
-const fadeStrip=canvasTex(8,256,(g,w,h)=>{ const gr=g.createLinearGradient(0,0,0,h); gr.addColorStop(0,'rgba(255,255,255,1)'); gr.addColorStop(.35,'rgba(255,255,255,.35)'); gr.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=gr; g.fillRect(0,0,w,h); });
+// soft shadow strip under wall pieces: fades downward and also at both ends, so it never reads as a grey rectangle
+const fadeStrip=canvasTex(64,256,(g,w,h)=>{ const gr=g.createLinearGradient(0,0,0,h); gr.addColorStop(0,'rgba(255,255,255,1)'); gr.addColorStop(.35,'rgba(255,255,255,.35)'); gr.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=gr; g.fillRect(0,0,w,h);
+  g.globalCompositeOperation='destination-in'; const hz=g.createLinearGradient(0,0,w,0); hz.addColorStop(0,'rgba(0,0,0,0)'); hz.addColorStop(.18,'rgba(0,0,0,1)'); hz.addColorStop(.82,'rgba(0,0,0,1)'); hz.addColorStop(1,'rgba(0,0,0,0)'); g.fillStyle=hz; g.fillRect(0,0,w,h); });
 const beamT=canvasTex(8,256,(g,w,h)=>{ const gr=g.createLinearGradient(0,0,0,h); gr.addColorStop(0,'#ffffff'); gr.addColorStop(.5,'#444444'); gr.addColorStop(1,'#000000'); g.fillStyle=gr; g.fillRect(0,0,w,h); },false);
 
 // dusk sky with distant city: muted, not a postcard
@@ -1760,9 +1762,9 @@ function wallFrame(parent,x,y,ow,oh,iw,ih,photo,fmat,tilt){
   rBox(ow,oh,0.022,0.0025,fmat,0,0,0.011,g);
   add(new THREE.Mesh(new THREE.PlaneGeometry(ow-0.024,oh-0.024),M.paper),g,false).position.z=0.0222;
   const pm=photo&&photo.isTexture?photo:(photo?toTex(photo):null), pMat=std({map:pm,color:photo?0xffffff:0xD8D2C8,roughness:.62,emissive:0xFFF2E6,emissiveMap:pm,emissiveIntensity:0});
-  pMat.userData.keepEmissive=true; const pMesh=add(new THREE.Mesh(new THREE.PlaneGeometry(iw,ih),pMat),g,false); pMesh.position.z=0.0226; if(photo) wallPhotos.push(pMesh);
+  pMat.userData.keepEmissive=true; const pMesh=add(new THREE.Mesh(new THREE.PlaneGeometry(iw,ih),pMat),g,false); pMesh.position.z=0.0226; if(photo){ wallPhotos.push(pMesh); pMesh.userData.lamp=Math.max(0.3,Math.min(0.8,1.05-0.9*Math.hypot(x-1.515,y-1.86))); }
   const gl=new THREE.Mesh(new THREE.PlaneGeometry(ow-0.02,oh-0.02),glassMat); gl.position.z=0.023; g.add(gl);
-  aoStrip(ow+0.02,0.04,new THREE.Vector3(x+0.004,y-oh/2-0.02,WF+0.001),[0,0,Math.PI],.24);
+  aoStrip(ow+0.03,0.03,new THREE.Vector3(x+0.002,y-oh/2-0.014,WF+0.001),[0,0,Math.PI],.16);
   return g;
 }
 const PHOTO_GLOW=0.05; // lamp off: the photos sit in the room's dim light like everything else
@@ -2082,7 +2084,7 @@ const scGlow=glowSprite(0xFF6A1C,0.3,.14); scGlow.position.set(sconce.position.x
 const scWash=new THREE.Mesh(new THREE.PlaneGeometry(0.7,0.6),new THREE.MeshBasicMaterial({map:blobRound,color:0xFF5E14,transparent:true,opacity:.12,blending:THREE.AdditiveBlending,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-4}));
 scWash.position.set(sconce.position.x,SC_Y+0.02,WF+0.002); scWash.renderOrder=2; scene.add(scWash);
 const WALL_LAMP=accentLamp({shade:scShade, stems:[scPlate,scArm,scKnee,scStem], core:scCore, light:scLight, glow:scGlow, wash:scWash, shadeOn:.85, stemOn:.14, lightOn:1.0, // brighter wall lamp: it lights the photos beside it
-  extra:on=>wallPhotos.forEach(m=>setEI(m,on?0.95:PHOTO_GLOW))});
+  extra:on=>wallPhotos.forEach(m=>setEI(m,on?m.userData.lamp:PHOTO_GLOW))});
 WALL_LAMP.apply();
 
 // three small framed certificates above it
