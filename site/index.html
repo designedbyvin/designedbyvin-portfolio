@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Vin's Workspace by Melvin Lomboy</title>
 <link rel="icon" href="/favicon.ico" sizes="48x48">
-<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20512%20512%22%3E%3Crect%20width%3D%22512%22%20height%3D%22512%22%20rx%3D%22116%22%20fill%3D%22%231E1A15%22/%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22a%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23F2994A%22%20stop-opacity%3D%220.55%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23F2994A%22%20stop-opacity%3D%220%22/%3E%3C/linearGradient%3E%0A%20%20%20%3CclipPath%20id%3D%22ac%22%3E%3Crect%20width%3D%22512%22%20height%3D%22512%22%20rx%3D%22116%22/%3E%3C/clipPath%3E%3C/defs%3E%0A%20%20%3Cg%20clip-path%3D%22url%28%23ac%29%22%3E%3Cpolygon%20points%3D%22330%2C206%20412%2C206%20470%2C420%20296%2C420%22%20fill%3D%22url%28%23a%29%22/%3E%3C/g%3E%0A%20%20%3Cpath%20d%3D%22M318%20146%20L132%20262%20L300%20370%22%20fill%3D%22none%22%20stroke%3D%22%23F3EDE2%22%20stroke-width%3D%2240%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%0A%20%20%3Cpath%20d%3D%22M348%2088%20Q372%2076%20396%2088%20L426%20196%20Q371%20214%20316%20196%20Z%22%20fill%3D%22%23F3EDE2%22%20transform%3D%22rotate%28-8%20371%20150%29%22/%3E%0A%20%20%3Ccircle%20cx%3D%22318%22%20cy%3D%22146%22%20r%3D%2213%22%20fill%3D%22%231E1A15%22/%3E%3Ccircle%20cx%3D%22318%22%20cy%3D%22146%22%20r%3D%225.5%22%20fill%3D%22%23F3EDE2%22/%3E%0A%20%20%3Ccircle%20cx%3D%22368%22%20cy%3D%22208%22%20r%3D%2215%22%20fill%3D%22%23F2994A%22/%3E%0A%20%20%3Crect%20x%3D%2296%22%20y%3D%22398%22%20width%3D%22132%22%20height%3D%2234%22%20rx%3D%2217%22%20fill%3D%22%23F3EDE2%22/%3E%3C/svg%3E">
 <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -1327,7 +1327,6 @@ const arm=rBox(0.055,armA.distanceTo(armB)+0.02,0.01,0.004,M.alu,MX,(armA.y+armB
 arm.rotation.x=Math.atan2(armB.z-armA.z,armB.y-armA.y);
 const hinge=add(new THREE.Mesh(new THREE.CylinderGeometry(0.009,0.009,0.06,20),M.alu),monitor); hinge.rotation.z=Math.PI/2; hinge.position.copy(armB);
 const hole=add(new THREE.Mesh(new THREE.CylinderGeometry(0.009,0.009,0.012,16),M.black),monitor); hole.rotation.x=Math.PI/2-arm.rotation.x; hole.position.set(MX,DY+0.08,MZ-0.1);
-[[MX+0.318,MCY+0.105,0.12],[MX+0.322,MCY+0.04,-0.09]].forEach(([x,y,r])=>{ const n=new THREE.Mesh(new THREE.PlaneGeometry(0.058,0.058),std({map:noteT,roughness:.9,side:THREE.DoubleSide})); n.position.set(x,y,MZ+0.0026); n.rotation.z=r; monitor.add(n); });
 contact(0.26,0.22,MX,DY,MZ-0.07,.42,false);
 // monitor cable: down into a desk grommet, then hanging continuously to the floor and along the wall to a power strip
 tube([new THREE.Vector3(MX+0.05,MCY-0.1,MZ-0.045),new THREE.Vector3(MX+0.07,DY+0.06,MZ-0.095),new THREE.Vector3(MX+0.085,DY+0.014,-0.9),new THREE.Vector3(MX+0.088,DY-0.04,-0.9),
@@ -1587,26 +1586,26 @@ function paperFill(g,w,h,base){ g.fillStyle=base; g.fillRect(0,0,w,h); skipR((w*
 const cardC=canvasOf(1780,1020,(g,w,h)=>{ paperFill(g,w,h,'#F3EDE2'); g.scale(2,2);
   g.fillStyle='#2A2622'; g.font='600 60px "Bricolage Grotesque", sans-serif'; g.fillText(ABOUT.name,64,156);
   g.fillStyle='#6B655D'; g.font='400 29px "Instrument Sans", sans-serif'; g.fillText(ABOUT.role,64,204);
-  g.font='500 20px "JetBrains Mono", monospace'; g.fillText(ABOUT.place.toUpperCase(),64,404); g.fillText(ABOUT.site,64,440);
+  g.fillStyle='#2A2622'; g.font='500 22px "Instrument Sans", sans-serif'; g.fillText('Based in Manila, Philippines',64,318);
+  g.fillStyle='#6B655D'; g.font='400 22px "Instrument Sans", sans-serif'; g.fillText('Open to relocation (Singapore) and remote roles',64,350);
+  g.font='500 20px "JetBrains Mono", monospace'; g.fillText(ABOUT.site,64,440);
   g.fillStyle='#C98E62'; g.beginPath(); g.arc(890-72,74,7,0,Math.PI*2); g.fill(); });
 const cardBackC=canvasOf(1780,1020,(g,w,h)=>{ paperFill(g,w,h,'#EAE2D4'); g.scale(2,2);
   g.fillStyle='#2A2622'; g.font='600 40px "Bricolage Grotesque", sans-serif'; g.fillText('Let’s work together.',64,150);
-  g.fillStyle='#6B655D'; g.font='400 25px "Instrument Sans", sans-serif'; g.fillText('Product design and design engineering roles,',64,198); g.fillText('in Manila or abroad.',64,232);
+  g.fillStyle='#6B655D'; g.font='400 25px "Instrument Sans", sans-serif'; g.fillText('Open to UI/UX, product design and',64,198); g.fillText('design engineering roles.',64,232);
   g.fillStyle='#2A2622'; g.font='500 20px "JetBrains Mono", monospace'; g.fillText(ABOUT.site,64,404); g.fillText('github.com/designedbyvin',64,440);
   g.fillStyle='#C98E62'; g.beginPath(); g.arc(890-72,74,7,0,Math.PI*2); g.fill(); });
 const cardFrontT=toTex(cardC), cardBackT=toTex(cardBackC);
 const cardMat=std({map:cardFrontT,emissiveMap:cardFrontT,roughness:.86}), cardBack=std({map:cardBackT,emissiveMap:cardBackT,roughness:.86}), cardEdge=std({color:0xEDE6DA,roughness:.9});
 const cardMesh=()=>new THREE.Mesh(new THREE.BoxGeometry(0.089,0.051,0.0007),[cardEdge,cardEdge,cardEdge,cardEdge,cardMat,cardBack]);
 
-// walnut holder with a few cards leaning in its slot, turned toward the room; the front one can be picked up
-const cardGrp=new THREE.Group(); cardGrp.position.set(0.555,DY,-0.665); cardGrp.rotation.y=0.25; scene.add(cardGrp);
-rBox(0.074,0.016,0.034,0.004,walnut,0,0.008,0,cardGrp);
-add(new THREE.Mesh(new THREE.BoxGeometry(0.068,0.0006,0.005),M.black),cardGrp,false).position.set(0,0.0161,-0.004);
-const lean=-0.3, cards=[];
-for(let i=0;i<1;i++){ const c=add(cardMesh(),cardGrp); c.rotation.set(lean,rnd(-.012,.012),rnd(-.01,.01));
-  c.position.set(rnd(-.0012,.0012),0.0125+0.0255*Math.cos(lean),-0.0035+0.0255*Math.sin(lean)-i*0.0011); cards.push(c); }
-const heldCard=cards[0];
-contact(0.095,0.055,0,0,0,.45,false,0,cardGrp);
+// the calling card is taped to the top-right corner of the monitor; click it to take it down and read it
+const CARD_AT=new THREE.Vector3(MX+0.312,MCY+0.128,MZ+0.0034); // overhangs the bezel, just below the menu bar
+const cardGrp=new THREE.Group(); scene.add(cardGrp);
+const heldCard=add(cardMesh(),cardGrp,false); heldCard.position.copy(CARD_AT); heldCard.rotation.set(0,0,0.075);
+const cardTape=add(new THREE.Mesh(new THREE.PlaneGeometry(0.03,0.011),std({color:0xF2EEE4,roughness:.6,transparent:true,opacity:.72})),heldCard,false);
+cardTape.position.set(0.004,0.0255,0.0005); cardTape.rotation.z=-0.12; // a bit of clear tape over the top edge
+skipR(3); // keep the rest of the room's random layout exactly as before
 
 /* case-study folder: pressboard covers on a hinge, four printed sheets inside */
 const FOLD_W=0.235, FOLD_D=0.315, SW=0.219, SH=0.299, STACK=0.0076, PIV_Y=STACK+0.003;
@@ -2425,13 +2424,17 @@ function setCardHeld(){ const r=heldPose(goal,0.089,0.051,0.6,0.56); cardGrp.upd
   cardHeld.pos.copy(cardGrp.worldToLocal(r.center.clone()));
   cardHeld.q.copy(cardGrp.getWorldQuaternion(new THREE.Quaternion()).invert().multiply(r.q)); }
 function flipCard(){ CARD.flip=!CARD.flip; }
+// up close on the card where it is on the monitor
+function cardPose(){ const tf=tfov(), d=Math.max((0.051/2)/(0.62*tf),(0.089/2)/(0.7*tf*camera.aspect))+0.05;
+  return {pos:CARD_AT.clone().add(V(0,0,d)), look:CARD_AT.clone()}; }
+// from the zoomed-in monitor, the card can be clicked straight away
+function cardFromMonitor(){ if(active) returnToRoom(); setTimeout(()=>focusOn('callingCard'),0); }
 const qFlip=new THREE.Quaternion(), qTmp=new THREE.Quaternion();
-function updateCard(dt){
+function updateCard(dt){ // the card stays taped to the monitor; flipping turns it over where it is
   CARD.t=approach(CARD.t,CARD.held?1:0,dt*1.5); CARD.flipT+=((CARD.flip?1:0)-CARD.flipT)*Math.min(1,dt*6);
   const e=ease(CARD.t);
-  qTmp.copy(cardHeld.q).multiply(qFlip.setFromAxisAngle(UP,Math.PI*CARD.flipT));
-  heldCard.position.lerpVectors(cardRest.pos,cardHeld.pos,e); heldCard.position.y+=Math.sin(Math.PI*e)*0.03;
-  heldCard.quaternion.copy(cardRest.q).slerp(qTmp,e);
+  heldCard.position.copy(cardRest.pos); heldCard.position.z+=Math.sin(Math.PI*CARD.flipT)*0.05; // just clears the screen while it turns
+  heldCard.quaternion.copy(cardRest.q).multiply(qFlip.setFromAxisAngle(UP,Math.PI*CARD.flipT));
   const mats=heldCard.material;
   if(CARD.t>0.002){ CARD.lit=true; [mats[4],mats[5]].forEach(m=>{ m.emissive.setHex(0xffffff); m.emissiveIntensity=0.3*e; }); }
   else if(CARD.lit){ CARD.lit=false; [mats[4],mats[5]].forEach(m=>{ m.emissive.setHex(0); m.emissiveIntensity=1; }); }
@@ -2614,7 +2617,9 @@ function careerAtQ(h){ if(!h) return false; const p=careerArt.worldToLocal(h.poi
 const OBJECTS={
   monitor:     {obj:monitor,  label:'View my work', inspect:true, pose:()=>monitorPose(),
                 enter:()=>{ OS.hover=null; drawOS(); }, exit:()=>{ OS.hover=null; drawOS(); }, // same layout in the room and up close: zooming only brings it nearer
-                reflow:()=>{ OS.s=osScale(); drawOS(); }, hover:osHover, click:osClick,
+                reflow:()=>{ OS.s=osScale(); drawOS(); }, extra:()=>[heldCard],
+                hover:h=>{ if(h && h.object===heldCard){ if(OS.hover){ OS.hover=null; drawOS(); } return 'About & contact'; } return osHover(h); },
+                click:h=>{ if(h && h.object===heldCard){ cardFromMonitor(); return; } osClick(h); },
                 bar:()=>[{hint:coarse?'Tap the screen to use it':'Use the screen'}]},
   folder:      {obj:caseStack, label:'Case studies', inspect:true, pose:()=>stackPose(),
                 enter:()=>{ curBook=-1; pendingBook=-1; glowBook(-1); },
@@ -2638,10 +2643,8 @@ const OBJECTS={
                 bar:()=>{ if(!NOTE.open) return [{hint:coarse?'Double-tap the sketchbook to open it':'Double-click the sketchbook to open it'},{label:'Open',fn:openNote}];
                   const s=NOTE.spread; return [{label:'‹',aria:'Previous page',fn:()=>turnNote(-1),off:s===0},{text:`${NOTE_SPREADS[s]} · ${s+1}/${NOTE_SPREADS.length}`},{label:'›',aria:'Next page',fn:()=>turnNote(1),off:s===NOTE_SPREADS.length-1},
                     NOTE_CASE[s]?{label:'View case study',fn:()=>openCasePage(NOTE_CASE[s])}:null]; }},
-  callingCard: {obj:cardGrp,  label:'About & contact', inspect:true,
-                camera:V(0.64,DY+0.3,-0.35), target:V(0.555,DY+0.045,-0.665),
-                enter:()=>{ setCardHeld(); CARD.held=true; CARD.flip=false; }, exit:()=>{ CARD.held=false; CARD.flip=false; },
-                reflow:setCardHeld,
+  callingCard: {obj:cardGrp,  label:'About & contact', inspect:true, pose:()=>cardPose(),
+                enter:()=>{ CARD.held=true; CARD.flip=false; }, exit:()=>{ CARD.held=false; CARD.flip=false; },
                 hover:h=>h&&h.object===heldCard?(coarse?'Tap to flip':'Click to flip'):null,
                 click:h=>{ if(h.object===heldCard) flipCard(); },
                 bar:()=>[{hint:coarse?'Tap the card to flip it':'Click the card to flip it'},{label:'Flip',fn:flipCard},{label:'GitHub ↗',href:'https://github.com/designedbyvin'}]},
@@ -2720,7 +2723,7 @@ function focusOn(key){
   setHover(-1); tip.hidden=true; canvas.classList.remove('hot'); app.classList.add('focused');
   if(o.screen){ goal=monitorPose(); awaitScreen=true; return; }
   if(o.inspect){
-    goal=inspectGoal(o); insList=[]; o.obj.traverse(m=>{ if(m.isMesh && !(m.material && m.material.transparent)) insList.push(m); });
+    goal=inspectGoal(o); insList=[]; o.obj.traverse(m=>{ if(m.isMesh && !(m.material && m.material.transparent)) insList.push(m); }); if(o.extra) o.extra().forEach(m=>insList.push(m));
     if(o.enter) o.enter(); showBar(); return;
   }
   const side=panelSideFor(o); goal=focusPose(o,side); setHover(KEYS.indexOf(key));
