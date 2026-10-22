@@ -70,11 +70,12 @@ body{background:#14120F;color:var(--ink);font-family:var(--body);overflow:hidden
 .chrome > *{pointer-events:auto}
 .focused .chrome,.focused .hint{opacity:0;pointer-events:none}
 .focused .chrome > *{pointer-events:none}
-.name{background:var(--glass);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:12px;padding:12px 16px;max-width:470px}
-.name h1{margin:0;font:700 22px/1.1 var(--display);letter-spacing:.02em;text-transform:uppercase}
+.name{background:var(--glass);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:12px;padding:11px 15px 12px;max-width:440px}
+.name h1{margin:0;font:700 18px/1.1 var(--display);letter-spacing:.06em;text-transform:uppercase}
 .name p{margin:4px 0 0;font-size:13px;color:var(--muted)}
-.name .tag{margin-top:7px;font-size:14px;line-height:1.35;color:var(--ink);text-wrap:pretty}
-.name .role{margin-top:5px;font-size:11.5px}
+/* three clear levels: name, then the line about how you work, then the small role line */
+.name .tag{margin-top:6px;font-size:13px;line-height:1.4;color:rgba(243,237,226,.82);text-wrap:pretty}
+.name .role{margin-top:6px;font:500 10px/1.3 var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
 .idx{position:relative}
 .idx > button{font:500 12px/1 var(--mono);letter-spacing:.04em;color:var(--ink);background:var(--glass);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:999px;padding:10px 14px;cursor:pointer}
 .idx > button:hover{border-color:rgba(255,255,255,.4)}
@@ -286,8 +287,8 @@ body{background:#14120F;color:var(--ink);font-family:var(--body);overflow:hidden
   .name{padding:7px 11px;max-width:250px;border-radius:10px}
   .name h1{font-size:15px}
   .name p{font-size:11px;margin-top:2px}
-  .name .tag{font-size:11.5px;margin-top:4px}
-  .name .role{font-size:10px}
+  .name .tag{font-size:11px;margin-top:4px}
+  .name .role{font-size:8.5px}
   .idx > button{padding:7px 11px;font-size:11px}
   .idx-list{max-height:calc(100vh - 64px);overflow:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:4px;width:min(440px,calc(100vw - 24px))}
   .idx-list button{padding:7px 10px;font-size:13px}
@@ -436,7 +437,7 @@ const CASES = {
 const ABOUT = {
   name:'Melvin Lomboy', role:'Product Designer & Design Engineer', place:'Manila, Philippines', site:'designedbyvin.com',
   body:'I design products and then build them, so what ships matches what was designed. Open to product design and design engineering roles, in Manila or abroad, and open to relocation.',
-  contact:[['Website','designedbyvin.com','https://designedbyvin.com'],['GitHub','github.com/designedbyvin','https://github.com/designedbyvin'],['Email',null,null],['LinkedIn',null,null]]
+  contact:[['Website','designedbyvin.com','https://designedbyvin.com'],['GitHub','github.com/designedbyvin','https://github.com/designedbyvin'],['Email','lomboy.melvin255@gmail.com','mailto:lomboy.melvin255@gmail.com'],['LinkedIn',null,null]]
 };
 const HOBBIES = [ // shown as the caption when a photo on the wall is hovered
   { key:'moto', title:'Riding motorcycles', text:'Riding my motorcycle gives me a sense of peace and freedom. Out in the middle of the road, it’s just me and the open air.' },
@@ -1593,16 +1594,16 @@ const cardC=canvasOf(1780,1020,(g,w,h)=>{ paperFill(g,w,h,'#F3EDE2'); g.scale(2,
 const cardBackC=canvasOf(1780,1020,(g,w,h)=>{ paperFill(g,w,h,'#EAE2D4'); g.scale(2,2);
   g.fillStyle='#2A2622'; g.font='600 40px "Bricolage Grotesque", sans-serif'; g.fillText('Let’s work together.',64,150);
   g.fillStyle='#6B655D'; g.font='400 25px "Instrument Sans", sans-serif'; g.fillText('Open to UI/UX, product design and',64,198); g.fillText('design engineering roles.',64,232);
-  g.fillStyle='#2A2622'; g.font='500 20px "JetBrains Mono", monospace'; g.fillText(ABOUT.site,64,404); g.fillText('github.com/designedbyvin',64,440);
+  g.fillStyle='#2A2622'; g.font='500 20px "JetBrains Mono", monospace'; g.fillText('lomboy.melvin255@gmail.com',64,368); g.fillText(ABOUT.site,64,404); g.fillText('github.com/designedbyvin',64,440);
   g.fillStyle='#C98E62'; g.beginPath(); g.arc(890-72,74,7,0,Math.PI*2); g.fill(); });
 const cardFrontT=toTex(cardC), cardBackT=toTex(cardBackC);
 const cardMat=std({map:cardFrontT,emissiveMap:cardFrontT,roughness:.86}), cardBack=std({map:cardBackT,emissiveMap:cardBackT,roughness:.86}), cardEdge=std({color:0xEDE6DA,roughness:.9});
 const cardMesh=()=>new THREE.Mesh(new THREE.BoxGeometry(0.089,0.051,0.0007),[cardEdge,cardEdge,cardEdge,cardEdge,cardMat,cardBack]);
 
 // the calling card is taped to the top-right corner of the monitor; click it to take it down and read it
-const CARD_AT=new THREE.Vector3(MX+0.312,MCY+0.128,MZ+0.0034); // overhangs the bezel, just below the menu bar
+const CARD_S=1.25, CARD_AT=new THREE.Vector3(MX+0.322,MCY+0.121,MZ+0.0034); // overhangs the bezel, just below the menu bar
 const cardGrp=new THREE.Group(); scene.add(cardGrp);
-const heldCard=add(cardMesh(),cardGrp,false); heldCard.position.copy(CARD_AT); heldCard.rotation.set(0,0,0.075);
+const heldCard=add(cardMesh(),cardGrp,false); heldCard.position.copy(CARD_AT); heldCard.rotation.set(0,0,0.075); heldCard.scale.set(CARD_S,CARD_S,1); // a little larger than a real card so it reads from the room
 const cardTape=add(new THREE.Mesh(new THREE.PlaneGeometry(0.03,0.011),std({color:0xF2EEE4,roughness:.6,transparent:true,opacity:.72})),heldCard,false);
 cardTape.position.set(0.004,0.0255,0.0005); cardTape.rotation.z=-0.12; // a bit of clear tape over the top edge
 skipR(3); // keep the rest of the room's random layout exactly as before
@@ -2425,7 +2426,7 @@ function setCardHeld(){ const r=heldPose(goal,0.089,0.051,0.6,0.56); cardGrp.upd
   cardHeld.q.copy(cardGrp.getWorldQuaternion(new THREE.Quaternion()).invert().multiply(r.q)); }
 function flipCard(){ CARD.flip=!CARD.flip; }
 // up close on the card where it is on the monitor
-function cardPose(){ const tf=tfov(), d=Math.max((0.051/2)/(0.62*tf),(0.089/2)/(0.7*tf*camera.aspect))+0.05;
+function cardPose(){ const tf=tfov(), d=Math.max((0.051*CARD_S/2)/(0.62*tf),(0.089*CARD_S/2)/(0.7*tf*camera.aspect))+0.05;
   return {pos:CARD_AT.clone().add(V(0,0,d)), look:CARD_AT.clone()}; }
 // from the zoomed-in monitor, the card can be clicked straight away
 function cardFromMonitor(){ if(active) returnToRoom(); setTimeout(()=>focusOn('callingCard'),0); }
