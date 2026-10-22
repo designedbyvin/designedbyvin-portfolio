@@ -2115,7 +2115,7 @@ function careerCanvas(){ return canvasOf(1400,960,(g,w,h)=>{
     else { g.fillStyle='#E8E2D5'; g.beginPath(); g.arc(x,y,16,0,Math.PI*2); g.fill(); g.strokeStyle=RED; g.lineWidth=4.5; g.beginPath(); g.arc(x,y,14,0,Math.PI*2); g.stroke(); } });
   const L=[['UI/UX DESIGN','INTERN'],['UI/UX','DESIGNER'],['UI/UX DESIGN','TEAM LEAD'],['PRODUCT DESIGNER /','DESIGN ENGINEER']];
   g.textAlign='center';
-  P.forEach(([x,y],i)=>{ if(i===3) return; g.fillStyle='rgba(42,38,34,.5)'; g.font='400 19px "JetBrains Mono", monospace'; g.fillText('0'+(i+1),x,y+58);
+  P.forEach(([x,y],i)=>{ if(i===3) return; g.fillStyle='rgba(42,38,34,.62)'; g.font='500 20px "JetBrains Mono", monospace'; g.fillText(['2024','2024','2025'][i],x,y+58); // the year each step began
     g.fillStyle=i<3?'#2A2622':'rgba(42,38,34,.78)'; g.font='600 25px "Instrument Sans", sans-serif'; L[i].forEach((t,k)=>g.fillText(t,x,y+94+k*31)); });
   // where next: a large question mark, no pin and no title of its own
   const [qx,qy]=CAREER_Q; g.textAlign='center';
