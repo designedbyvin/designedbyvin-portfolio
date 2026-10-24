@@ -691,7 +691,7 @@ const PERF={}; const perfMark=k=>{ PERF[k]=Math.round(performance.now()); };
 perfMark('scripts');
 renderer.domElement.addEventListener('webglcontextlost',e=>{ e.preventDefault(); },false);
 renderer.domElement.addEventListener('webglcontextrestored',()=>{ location.reload(); },false);
-const PR_BASE=SOFT_GPU?1:Math.min(window.devicePixelRatio||1,LOW_GPU?1.2:(window.matchMedia('(pointer: coarse)').matches?1.35:1.5)), PR_READ=Math.min(window.devicePixelRatio||1,2.5); let PR=PR_BASE; renderer.setPixelRatio(PR);
+const PR_BASE=SOFT_GPU?1:Math.min(window.devicePixelRatio||1,LOW_GPU?1.2:(window.matchMedia('(pointer: coarse)').matches?1.35:1.5)), PR_READ=Math.min(window.devicePixelRatio||1,2); let PR=PR_BASE; renderer.setPixelRatio(PR);
 renderer.outputEncoding=THREE.sRGBEncoding;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure=1.06;
@@ -1173,7 +1173,7 @@ for(let i=0;i<RAIN_N;i++){
 const rainGeo=new THREE.BufferGeometry();
 rainGeo.setAttribute('position',new THREE.BufferAttribute(rainPos,3)); rainGeo.setAttribute('color',new THREE.BufferAttribute(rainCol,3));
 const rainMat=new THREE.LineBasicMaterial({vertexColors:true,transparent:true,opacity:1,depthWrite:false,blending:THREE.AdditiveBlending,fog:false});
-const rain=new THREE.LineSegments(rainGeo,rainMat); rain.frustumCulled=false; rain.renderOrder=1; scene.add(rain);
+const rain=new THREE.LineSegments(rainGeo,rainMat); rain.frustumCulled=false; rain.renderOrder=1; scene.add(rain); rain.visible=false; // just after the rain: the view outside is still
 // 2) sheets of rain: layered planes of motion-blurred streaks, scrolling at different depths and speeds
 const streakT=canvasTex(512,1024,(g,w,h)=>{
   for(let i=0;i<900;i++){ const x=rnd(0,w), y=rnd(0,h), len=rnd(30,70), wd=rnd(1.4,2.4), a=rnd(.25,.6), dx=len*0.07;
@@ -1186,7 +1186,7 @@ streakT.wrapS=streakT.wrapT=THREE.RepeatWrapping; streakT.anisotropy=aniso;
 const rainSheets=[[WZ-1.2,5,4.6,1.4,1,.16,3.4],[WZ-3,9,7.5,2.4,1.7,.15,3.9],[WZ-6.5,17,12,4.2,3,.13,4.3]].map(([z,w,h,rx,ry,op,sp])=>{
   const t=streakT.clone(); t.needsUpdate=true; t.repeat.set(rx,ry); t.offset.x=R();
   const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:t,color:0x9AA8C4,transparent:true,opacity:op,blending:THREE.AdditiveBlending,depthWrite:false}));
-  m.position.set(WCX,WCY-0.2,z); m.renderOrder=1; scene.add(m); return {t,sp}; });
+  m.position.set(WCX,WCY-0.2,z); m.renderOrder=1; scene.add(m); m.visible=false; return {t,sp}; });
 function updateRain(dt){
   for(let i=0;i<RAIN_N;i++){ const d=rainD[i];
     d.y-=d.sp*dt; d.x-=RAIN_WIND*d.sp*dt*0.1;
@@ -2466,7 +2466,7 @@ function osWindow(g,R,x,y,w,h,title,k){ // a light app window with a title bar; 
   R.push({id:'close',x:x+(k?12:8),y:y+4,w:k?28:20,h:tb-8,act:()=>{ OS.win=null; }});
   g.fillStyle='#6B6F78'; g.font=`500 ${k?15:10}px "Instrument Sans", sans-serif`; g.textAlign='center'; g.fillText(title,x+w/2,cy+(k?5:3.5)); g.textAlign='left';
   return y+tb; }
-function drawOS(){
+function drawOS(){ if(window.wakeRoom) window.wakeRoom();
   const s=OS.s, W=OSW/s, H=OSH/s, g=og, R=[], wide=W>=1080, k=wide; OS.regions=R;
   g.setTransform(1,0,0,1,0,0);
   // light wallpaper: warm paper tone with a soft cool wash
@@ -3035,7 +3035,7 @@ function updatePost(){
   // the screen and pages stay crisp: bloom eases off while reading them
   post.passes.forEach(p=>{ if(p.userData&&p.userData.fxaa) p.enabled=!reading; });
   if(bloom) bloom.strength+=((reading?0.05:0.17)-bloom.strength)*0.08;
-  if(gradePass){ const u=gradePass.uniforms; u.time.value=(performance.now()/1000)%600; // keep screen text and pages crisp while reading
+  if(gradePass){ const u=gradePass.uniforms; u.time.value=animT%600; // keep screen text and pages crisp while reading
     u.soft.value+=((reading?0:0.1)-u.soft.value)*0.15; u.grain.value+=((reading?0.008:0.035)-u.grain.value)*0.15; }
 }
 
@@ -3045,20 +3045,28 @@ window.addEventListener('resize',resize);
 const tmp=new THREE.Vector3(), tmpL=new THREE.Vector3(), clock=new THREE.Clock(); const npEl=document.getElementById('np'), np3=new THREE.Vector3();
 const portraitPhone=window.matchMedia('(orientation:portrait) and (max-width:599px) and (pointer:coarse)');
 // power: at most 60 fps (120 Hz screens would otherwise double the work), 30 fps once the room is left alone
-let lastInput=performance.now(), lastFrameAt=0, lastBusyAt=0, warmFrames=0;
+let lastInput=performance.now(), lastFrameAt=0, lastBusyAt=0, lastMoveAt=0, warmFrames=0, animT=0;
+const playingNow=()=>typeof recAudio!=='undefined' && typeof nowTrack!=='undefined' && nowTrack>=0 && !recAudio.paused;
+let needFrame=false; window.wakeRoom=()=>{ needFrame=true; }; // anything that changes what's on screen without input asks for one fresh frame
+let winFocused=document.hasFocus(); window.addEventListener('focus',()=>{ winFocused=true; lastInput=performance.now(); }); window.addEventListener('blur',()=>{ winFocused=false; });
 ['pointermove','pointerdown','wheel','keydown','touchstart'].forEach(ev=>window.addEventListener(ev,()=>{ lastInput=performance.now(); },{passive:true}));
 function loop(){
   if(portraitPhone.matches){ clock.getDelta(); requestAnimationFrame(loop); return; } // paused behind the turn-your-phone prompt
-  const nowMs=performance.now(), busy=!revealed || !!goal || !!active || nowMs-lastInput<3000;
-  if(nowMs-lastFrameAt < (busy?1000/62:1000/31)){ requestAnimationFrame(loop); return; }
-  lastFrameAt=nowMs; if(active) lastBusyAt=nowMs;
-  renderer.shadowMap.needsUpdate = warmFrames++<8 || !!active || nowMs-lastBusyAt<2500;
-  const dt=Math.min(clock.getDelta(),0.05); adaptRes(nowMs,busy); const t=clock.elapsedTime, k=reduce?1:1-Math.exp(-dt*(goal?4.6:3.4));
+  // full speed only while something is actually changing (input, the camera gliding, a page turning, the screen redrawing)
+  const nowMs=performance.now(), idleFor=nowMs-lastInput, busy=!revealed || idleFor<2500 || nowMs-lastMoveAt<400;
+  // still view: nothing outside moves, so the room only checks for changes twice a second; a playing record keeps 24 fps so it turns smoothly
+  const cap=busy?62:playingNow()?(winFocused?24:8):(winFocused?2:1);
+  if(document.hidden || (!needFrame && nowMs-lastFrameAt < 1000/cap)){ requestAnimationFrame(loop); return; }
+  needFrame=false;
+  lastFrameAt=nowMs; if(busy) lastBusyAt=nowMs;
+  renderer.shadowMap.needsUpdate = warmFrames++<8 || nowMs-lastBusyAt<1500; // shadows only change while things move
+  const dt=Math.min(clock.getDelta(),0.05); adaptRes(nowMs,busy); const adt=(busy||playingNow())?dt:0; animT+=adt; const t=animT, k=reduce?1:1-Math.exp(-dt*(goal?4.6:3.4));
   if(goal){ tmp.copy(goal.pos); tmpL.copy(goal.look); }
   else {
     yaw+=(tYaw+(reduce?0:mx*0.06)-yaw)*k; tilt+=(tTilt+(reduce?0:my*0.03)-tilt)*k;
     const off=ROOM_VIEW.pos.clone().sub(ROOM_VIEW.look); off.applyAxisAngle(UP,yaw); off.y+=tilt*1.6; tmp.copy(ROOM_VIEW.look).add(off); tmpL.copy(ROOM_VIEW.look);
   }
+  if(camPos.distanceToSquared(tmp)+camLook.distanceToSquared(tmpL)>1e-7) lastMoveAt=nowMs;
   camPos.lerp(tmp,k); camLook.lerp(tmpL,k);
   camera.position.copy(camPos); camera.lookAt(camLook);
   if(npEl && !npEl.hidden){ // the song title floats above the record player
@@ -3068,11 +3076,11 @@ function loop(){
   if(!reduce){
     for(let i=0;i<DN;i++){ const b=dBase[i], s=dSeed[i]; dPos[i*3]=b.x+Math.sin(t*0.12+s)*0.05; dPos[i*3+1]=b.y+Math.sin(t*0.09+s*1.7)*0.06; dPos[i*3+2]=b.z+Math.cos(t*0.1+s)*0.05; }
     dustGeo.attributes.position.needsUpdate=true;
-    updateRain(dt); updateGlass(dt); updateLightning();
+    updateGlass(adt);
     { const playing=typeof recAudio!=='undefined' && typeof nowTrack!=='undefined' && nowTrack>=0 && !recAudio.paused; // the record turns only while a track plays
       spinV+=((playing?3.49:0)-spinV)*Math.min(1,dt*(playing?1.6:1.1)); if(spinV>0.002) spinGrp.rotation.y-=spinV*dt; }
-    redLights.forEach((l,i)=>{ l.material.opacity=night?(Math.sin(t*2.2+i*1.7)>.4?.85:.08):0; });
-    for(let i=0;i<SN;i++){ sLife[i]+=dt*0.22; if(sLife[i]>1) sLife[i]-=1; const l=sLife[i];
+    redLights.forEach(l=>{ l.material.opacity=night?.7:0; }); // steady aircraft-warning lights
+    for(let i=0;i<SN;i++){ sLife[i]+=adt*0.22; if(sLife[i]>1) sLife[i]-=1; const l=sLife[i];
       sPos[i*3]=MGX+Math.sin(l*6+i)*0.012*l; sPos[i*3+1]=DY+0.085+l*0.15; sPos[i*3+2]=MGZ+Math.cos(l*5+i*2)*0.01*l; }
     steamGeo.attributes.position.needsUpdate=true;
   }
