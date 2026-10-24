@@ -2043,28 +2043,49 @@ const dataURL=c=>{ try{ return c.toDataURL('image/jpeg',.86); }catch(e){ return 
 
 /* calling card: 89 × 51 mm, warm uncoated stock, drawn at 2x so it stays sharp when held up close */
 function paperFill(g,w,h,base){ g.fillStyle=base; g.fillRect(0,0,w,h); skipR((w*h/70|0)*8); tileOver(g,w,h,'paper',1); }
-const cardC=canvasOf(1780,1020,(g,w,h)=>{ paperFill(g,w,h,'#F3EDE2'); g.scale(2,2);
-  g.fillStyle='#2A2622'; g.font='600 60px "Bricolage Grotesque", sans-serif'; g.fillText(ABOUT.name,64,156);
-  g.fillStyle='#6B655D'; g.font='400 29px "Instrument Sans", sans-serif'; g.fillText(ABOUT.role,64,204);
-  g.fillStyle='#2A2622'; g.font='500 22px "Instrument Sans", sans-serif'; g.fillText('Based in Manila, Philippines',64,318);
-  g.fillStyle='#6B655D'; g.font='400 22px "Instrument Sans", sans-serif'; g.fillText('Open to relocation (Singapore) and remote roles',64,350);
-  g.font='500 20px "JetBrains Mono", monospace'; g.fillText(ABOUT.site,64,440);
+const cardEdges=(g,w,h)=>{ // a barely-there edge: the cut paper catches a little shade, and the lifted corner a little light
+  g.strokeStyle='rgba(110,92,70,.16)'; g.lineWidth=3; g.strokeRect(1.5,1.5,w-3,h-3);
+  const cr=g.createRadialGradient(w,h,0,w,h,w*.34); cr.addColorStop(0,'rgba(255,255,255,.10)'); cr.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=cr; g.fillRect(0,0,w,h); };
+const cardC=canvasOf(1780,1020,(g,w,h)=>{ paperFill(g,w,h,'#F3EDE2'); cardEdges(g,w,h); g.scale(2,2);
+  g.fillStyle='#2A2622'; g.font='600 64px "Bricolage Grotesque", sans-serif'; g.fillText(ABOUT.name,64,168);
+  g.fillStyle='#6B655D'; g.font='400 29px "Instrument Sans", sans-serif'; g.fillText(ABOUT.role,64,218);
+  g.fillStyle='#4A443D'; g.font='400 21px "Instrument Sans", sans-serif'; g.fillText('Manila, Philippines  ·  Open to relocating to Singapore or elsewhere',64,318);
+  g.fillStyle='rgba(42,38,34,.14)'; g.fillRect(64,398,762,1.5);
+  g.fillStyle='#8A8278'; g.font='500 16px "JetBrains Mono", monospace'; g.fillText(ABOUT.site,64,446);
   g.fillStyle='#C98E62'; g.beginPath(); g.arc(890-72,74,7,0,Math.PI*2); g.fill(); });
-const cardBackC=canvasOf(1780,1020,(g,w,h)=>{ paperFill(g,w,h,'#EAE2D4'); g.scale(2,2);
-  g.fillStyle='#2A2622'; g.font='600 40px "Bricolage Grotesque", sans-serif'; g.fillText('Let’s work together.',64,150);
-  g.fillStyle='#6B655D'; g.font='400 25px "Instrument Sans", sans-serif'; g.fillText('Open to UI/UX, product design and',64,198); g.fillText('design engineering roles.',64,232);
-  g.fillStyle='#2A2622'; g.font='500 20px "JetBrains Mono", monospace'; g.fillText('lomboy.melvin255@gmail.com',64,368); g.fillText(ABOUT.site,64,404); g.fillText('github.com/designedbyvin',64,440);
+// the back: email is the main action; portfolio and GitHub sit below it. Each is clickable on the card (CARD_LINKS, in card units of 890 × 510)
+const CARD_LINKS=[[52,272,800,374,'mailto:lomboy.melvin255@gmail.com','Email me'],[52,396,452,478,'https://designedbyvin.com','Open portfolio ↗'],[462,396,860,478,'https://github.com/designedbyvin','Open GitHub ↗']];
+const cardBackC=canvasOf(1780,1020,(g,w,h)=>{ paperFill(g,w,h,'#EAE2D4'); cardEdges(g,w,h); g.scale(2,2);
+  g.fillStyle='#2A2622'; g.font='600 40px "Bricolage Grotesque", sans-serif'; g.fillText('Let’s work together.',64,132);
+  g.fillStyle='#6B655D'; g.font='400 22px "Instrument Sans", sans-serif'; g.fillText('Open to UI/UX, product design and design engineering roles.',64,176);
+  g.fillStyle='#C98E62'; g.font='500 15px "JetBrains Mono", monospace'; g.fillText('EMAIL ME',64,300);
+  g.fillStyle='#2A2622'; g.font='600 31px "Instrument Sans", sans-serif'; const em='lomboy.melvin255@gmail.com'; g.fillText(em,64,344);
+  g.fillStyle='#C98E62'; g.fillRect(64,356,g.measureText(em).width,2.5); g.fillText('→',64+g.measureText(em).width+14,344);
+  g.fillStyle='rgba(42,38,34,.14)'; g.fillRect(64,386,762,1.5);
+  [['PORTFOLIO',ABOUT.site,64],['GITHUB','github.com/designedbyvin',470]].forEach(([l,v,x])=>{
+    g.fillStyle='#8A8278'; g.font='500 13px "JetBrains Mono", monospace'; g.fillText(l,x,428);
+    g.fillStyle='#2A2622'; g.font='500 19px "Instrument Sans", sans-serif'; g.fillText(v+'  ↗',x,458); });
   g.fillStyle='#C98E62'; g.beginPath(); g.arc(890-72,74,7,0,Math.PI*2); g.fill(); });
 const cardFrontT=toTex(cardC), cardBackT=toTex(cardBackC);
 const cardMat=std({map:cardFrontT,emissiveMap:cardFrontT,roughness:.86}), cardBack=std({map:cardBackT,emissiveMap:cardBackT,roughness:.86}), cardEdge=std({color:0xEDE6DA,roughness:.9});
-const cardMesh=()=>new THREE.Mesh(new THREE.BoxGeometry(0.089,0.051,0.0007),[cardEdge,cardEdge,cardEdge,cardEdge,cardMat,cardBack]);
+function cardGeo(){ const g=new THREE.BoxGeometry(0.089,0.051,0.0007,28,14,1), p=g.attributes.position;
+  for(let i=0;i<p.count;i++){ const x=p.getX(i), y=p.getY(i), sx=Math.min(1,Math.max(0,(x+0.0445)/0.089)), sy=Math.min(1,Math.max(0,(0.0255-y)/0.051));
+    p.setZ(i,p.getZ(i)+0.0019*Math.pow(sx*sy,2.2)+0.0005*sy*sy); } // a gentle curl toward the lower-right corner, flat along the taped top
+  g.computeVertexNormals(); return g; }
+const cardMesh=()=>new THREE.Mesh(cardGeo(),[cardEdge,cardEdge,cardEdge,cardEdge,cardMat,cardBack]);
 
 // the calling card is taped to the top-right corner of the monitor; click it to take it down and read it
 const CARD_S=1.25, CARD_AT=new THREE.Vector3(MX+0.322,MCY+0.121,MZ+0.0034); // overhangs the bezel, just below the menu bar
 const cardGrp=new THREE.Group(); scene.add(cardGrp);
 const heldCard=add(cardMesh(),cardGrp,false); heldCard.position.copy(CARD_AT); heldCard.rotation.set(0,0,0.075); heldCard.scale.set(CARD_S,CARD_S,1); // a little larger than a real card so it reads from the room
-const cardTape=add(new THREE.Mesh(new THREE.PlaneGeometry(0.03,0.011),std({color:0xF2EEE4,roughness:.6,transparent:true,opacity:.72})),heldCard,false);
-cardTape.position.set(0.004,0.0255,0.0005); cardTape.rotation.z=-0.12; // a bit of clear tape over the top edge
+const tapeT=toTex(canvasOf(256,96,(g,w,h)=>{ g.fillStyle='#fff'; g.beginPath(); g.moveTo(6,0); // matte tape with slightly torn ends
+  for(let y=0;y<=h;y+=8) g.lineTo(y%16?10:4,y); g.lineTo(w-6,h); for(let y=h;y>=0;y-=8) g.lineTo(y%16?w-10:w-4,y); g.closePath(); g.fill();
+  g.fillStyle='rgba(0,0,0,.05)'; for(let x=0;x<w;x+=5) g.fillRect(x,0,1,h); }),null,false);
+const cardTape=add(new THREE.Mesh(new THREE.PlaneGeometry(0.028,0.012),std({color:0xFBF7EC,roughness:.7,transparent:true,opacity:.82,alphaMap:tapeT,depthWrite:false,emissive:0xFFF6E6,emissiveIntensity:.08})),heldCard,false);
+cardTape.position.set(-0.025,0.0252,0.0007); cardTape.rotation.z=-0.1; cardTape.material.userData.keepEmissive=true; // matte tape over the top edge, easy to see but not loud
+// a soft contact shadow behind the card, on the screen and bezel (stays put when the card is flipped)
+const cardShadow=new THREE.Mesh(new THREE.PlaneGeometry(0.089*CARD_S*1.05,0.051*CARD_S*1.08),new THREE.MeshBasicMaterial({color:0x000000,alphaMap:blobRect,transparent:true,opacity:.22,depthWrite:false}));
+cardShadow.position.copy(CARD_AT).add(new THREE.Vector3(0.0018,-0.0024,-0.0012)); cardShadow.rotation.z=0.075; cardGrp.add(cardShadow);
 skipR(3); // keep the rest of the room's random layout exactly as before
 
 /* case-study folder: pressboard covers on a hinge, four printed sheets inside */
@@ -3023,6 +3044,9 @@ function setCardHeld(){ const r=heldPose(goal,0.089,0.051,0.6,0.56); cardGrp.upd
   cardHeld.pos.copy(cardGrp.worldToLocal(r.center.clone()));
   cardHeld.q.copy(cardGrp.getWorldQuaternion(new THREE.Quaternion()).invert().multiply(r.q)); }
 function flipCard(){ CARD.flip=!CARD.flip; }
+// which link on the back of the card is under the pointer (only once the back is facing you)
+function cardLinkAt(h){ if(!h||h.object!==heldCard||!h.uv||!h.face||h.face.materialIndex!==5||CARD.flipT<0.85) return null;
+  const x=h.uv.x*890, y=(1-h.uv.y)*510; return CARD_LINKS.find(r=>x>=r[0]&&x<=r[2]&&y>=r[1]&&y<=r[3])||null; }
 // up close on the card where it is on the monitor
 function cardPose(){ const tf=tfov(), d=Math.max((0.051*CARD_S/2)/(0.62*tf),(0.089*CARD_S/2)/(0.7*tf*camera.aspect))+0.05;
   return {pos:CARD_AT.clone().add(V(0,0,d)), look:CARD_AT.clone()}; }
@@ -3032,7 +3056,8 @@ const qFlip=new THREE.Quaternion(), qTmp=new THREE.Quaternion();
 function updateCard(dt){ // the card stays taped to the monitor; flipping turns it over where it is
   CARD.t=approach(CARD.t,CARD.held?1:0,dt*1.5); CARD.flipT+=((CARD.flip?1:0)-CARD.flipT)*Math.min(1,dt*6);
   const e=ease(CARD.t);
-  heldCard.position.copy(cardRest.pos); heldCard.position.z+=Math.sin(Math.PI*CARD.flipT)*0.05; // just clears the screen while it turns
+  heldCard.position.copy(cardRest.pos); const lift=Math.sin(Math.PI*CARD.flipT); heldCard.position.z+=lift*0.05; // just clears the screen while it turns
+  cardShadow.material.opacity=.22*Math.max(0,1-lift*4); // the shadow only shows while the card lies against the screen
   heldCard.quaternion.copy(cardRest.q).multiply(qFlip.setFromAxisAngle(UP,Math.PI*CARD.flipT));
   const mats=heldCard.material;
   if(CARD.t>0.002){ CARD.lit=true; [mats[4],mats[5]].forEach(m=>{ m.emissive.setHex(0xffffff); m.emissiveIntensity=0.3*e; }); }
@@ -3247,9 +3272,9 @@ const OBJECTS={
                     NOTE_CASE[s]?{label:'View case study',fn:()=>openCasePage(NOTE_CASE[s])}:null]; }},
   callingCard: {obj:cardGrp,  label:'About & contact', inspect:true, pose:()=>cardPose(),
                 enter:()=>{ CARD.held=true; CARD.flip=false; }, exit:()=>{ CARD.held=false; CARD.flip=false; },
-                hover:h=>h&&h.object===heldCard?(coarse?'Tap to flip':'Click to flip'):null,
-                click:h=>{ if(h.object===heldCard) flipCard(); },
-                bar:()=>[{hint:coarse?'Tap the card to flip it':'Click the card to flip it'},{label:'Flip',fn:flipCard},{label:'GitHub ↗',href:'https://github.com/designedbyvin'}]},
+                hover:h=>{ const L=cardLinkAt(h); if(L) return L[5]; return h&&h.object===heldCard?(coarse?'Tap to flip':'Click to flip'):null; },
+                click:h=>{ const L=cardLinkAt(h); if(L){ openLink(L[4]); return; } if(h.object===heldCard) flipCard(); },
+                bar:()=>[{hint:coarse?'Tap the card to flip it':'Click the card to flip it'},{label:'Flip',fn:flipCard},{label:'Email me',href:'mailto:lomboy.melvin255@gmail.com'},{label:'GitHub ↗',href:'https://github.com/designedbyvin'}]},
   hobbyFrames: {obj:hobbyGrp, label:'Life outside work', inspect:true, pose:()=>wallPose(hobbyGrp,0.66),
                 hover:h=>{ const g=frameOf(h); if(g) showCap(g); else hideCap(); return null; },
                 click:h=>{ const g=frameOf(h); if(g) showCap(g); },
