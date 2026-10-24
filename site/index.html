@@ -537,9 +537,9 @@ const IMG={}; // preview images, drawn by the 3D build
 const caseLink=id=>`<button class="act" type="button" data-case="${id}">View case study →</button>`;
 const TRACKS = [
   // audio files live next to index.html, in a folder called music/
-  { title:'Bitter Sweet Symphony', artist:'The Verve', src:'music/bitter-sweet-symphony.mp3', cover:'music/bitter-sweet-symphony.jpg' },
   { title:'Landslide', artist:'Fleetwood Mac', src:'music/landslide.mp3', cover:'music/landslide.jpg' },
   { title:"You're Gonna Go Far", artist:'Noah Kahan', src:'music/youre-gonna-go-far.mp3', cover:'music/youre-gonna-go-far.jpg' },
+  { title:'Bitter Sweet Symphony', artist:'The Verve', src:'music/bitter-sweet-symphony.mp3', cover:'music/bitter-sweet-symphony.jpg' },
   { title:'Vienna', artist:'Billy Joel', src:'music/vienna.mp3', cover:'music/vienna.jpg' }
 ];
 let nowTrack=-1;
@@ -586,10 +586,33 @@ function openContextPanel(type,side){
 /* ---------- record player: plays the site's own audio files; only a small floating title shows above the turntable ---------- */
 const recAudio=new Audio(); recAudio.preload='none'; recAudio.volume=0.7;
 function setNP(sub){ const cv=$('np-cv'); if(TRACKS[nowTrack].cover){ cv.hidden=false; cv.src=TRACKS[nowTrack].cover; } else cv.hidden=true; $('np-t').textContent=TRACKS[nowTrack].title; $('np-a').textContent=sub||TRACKS[nowTrack].artist; $('np').hidden=false; }
-function playTrack(i){ const t=TRACKS[i]; if(!t) return; nowTrack=i; recAudio.src=t.src; recAudio.currentTime=0; setNP();
+function playTrack(i){ const t=TRACKS[i]; if(!t) return; nowTrack=i; recAudio.src=t.src; recAudio.currentTime=0; setNP(); try{ needleDrop(); }catch(e){}
   $('np').classList.remove('paused'); const pr=recAudio.play(); if(pr&&pr.catch) pr.catch(()=>{}); }
 function stopTrack(){ nowTrack=-1; recAudio.pause(); recAudio.removeAttribute('src'); recAudio.load(); $('np').hidden=true; }
 recAudio.addEventListener('ended',()=>{ if(nowTrack>=0) playTrack((nowTrack+1)%TRACKS.length); });
+/* ---------- the sound of a record: the music is warmed a touch (vinyl rolls off the very top and bottom), a needle drop starts each song,
+   and a soft surface crackle plays underneath while it spins. All made in the browser; nothing extra to download. ---------- */
+const VINYL={ac:null,crackle:null};
+function vinylInit(){ if(VINYL.ac) return VINYL.ac; const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return null;
+  try{ const ac=new AC(), src=ac.createMediaElementSource(recAudio);
+    const hp=ac.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=35; const lp=ac.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=11500; lp.Q.value=0.5;
+    const warm=ac.createBiquadFilter(); warm.type='peaking'; warm.frequency.value=220; warm.gain.value=2; warm.Q.value=0.8;
+    src.connect(hp); hp.connect(lp); lp.connect(warm); warm.connect(ac.destination);
+    // a few seconds of surface noise: faint hiss plus random clicks and pops, looped
+    const len=ac.sampleRate*6, buf=ac.createBuffer(2,len,ac.sampleRate);
+    for(let c=0;c<2;c++){ const d=buf.getChannelData(c); let b=0; for(let k=0;k<len;k++){ b=0.985*b+0.015*(Math.random()*2-1); d[k]=b*0.25; }
+      for(let n=0;n<180;n++){ const at=Math.floor(Math.random()*len), amp=Math.random()<.12?0.9:0.25+Math.random()*0.3, dur=Math.floor(ac.sampleRate*(0.0008+Math.random()*0.002));
+        for(let k=0;k<dur && at+k<len;k++) d[at+k]+=amp*(Math.random()*2-1)*Math.pow(1-k/dur,2); } }
+    const cs=ac.createBufferSource(); cs.buffer=buf; cs.loop=true; const cf=ac.createBiquadFilter(); cf.type='bandpass'; cf.frequency.value=2600; cf.Q.value=0.6;
+    const cg=ac.createGain(); cg.gain.value=0; cs.connect(cf); cf.connect(cg); cg.connect(ac.destination); cs.start();
+    VINYL.ac=ac; VINYL.crackle=cg; return ac; }catch(e){ return null; } }
+function vinylSurface(on){ const ac=VINYL.ac; if(!ac) return; if(ac.state==='suspended') ac.resume(); VINYL.crackle.gain.cancelScheduledValues(ac.currentTime); VINYL.crackle.gain.setTargetAtTime(on?0.06:0,ac.currentTime,on?0.4:0.15); }
+function needleDrop(){ const ac=vinylInit(); if(!ac) return; if(ac.state==='suspended') ac.resume();
+  const len=Math.floor(ac.sampleRate*0.9), buf=ac.createBuffer(1,len,ac.sampleRate), d=buf.getChannelData(0);
+  for(let k=0;k<len;k++){ const t=k/ac.sampleRate; d[k]=(t<0.05?Math.sin(t*2*Math.PI*60)*(1-t/0.05)*0.5:0)+(Math.random()*2-1)*0.05*Math.exp(-t*3)+(Math.random()<0.002?(Math.random()*2-1)*0.5:0); } // the thump of the stylus landing, then the lead-in groove
+  const s=ac.createBufferSource(); s.buffer=buf; const gn=ac.createGain(); gn.gain.value=0.55; s.connect(gn); gn.connect(ac.destination); s.start(); }
+recAudio.addEventListener('play',()=>{ vinylInit(); vinylSurface(true); });
+recAudio.addEventListener('pause',()=>vinylSurface(false)); recAudio.addEventListener('ended',()=>vinylSurface(false));
 recAudio.addEventListener('error',()=>{ if(nowTrack>=0 && recAudio.getAttribute('src')) { setNP('Audio file not added yet'); $('np').classList.add('paused'); } });
 function closeContextPanel(){
   if(!panelOpen) return; panelOpen=false;
@@ -1683,6 +1706,31 @@ add(new THREE.Mesh(new THREE.BoxGeometry(0.03,0.022,0.034),M.black)).position.se
 contact(0.3,0.09,0.945,0,-0.958,.45,false,0.02);
 tube([new THREE.Vector3(1.07,0.017,-0.962),new THREE.Vector3(1.12,0.01,-0.976),new THREE.Vector3(1.18,0.06,-0.982),new THREE.Vector3(1.198,0.12,-0.984),new THREE.Vector3(1.212,0.27,-0.984),new THREE.Vector3(1.215,0.33,WF+0.012)],0.0028,M.rubber,null,48);
 const monLight=new THREE.PointLight(0xB9CBF2,0.46,1.25,2); monLight.position.set(MX,MCY-0.02,-0.6); scene.add(monLight);
+/* gaming chair: pulled back from the front-left corner of the desk and turned toward it, as if someone just stood up.
+   Placed so that from the room's view it sits left of the desk and below the window, clear of the desk, folders and monitor. */
+{ const S0=SEED; const chair=new THREE.Group(); chair.position.set(-0.85,0,0.3); chair.rotation.y=-0.9; scene.add(chair);
+  const leather=std({color:0x1A1B20,roughness:.62}), accent=std({color:0x7A3E2A,roughness:.68}), metal=std({color:0x9A9DA4,roughness:.32,metalness:.85}), nylon=std({color:0x111214,roughness:.5});
+  // five-star base on casters, and the gas lift
+  for(let i=0;i<5;i++){ const a=i/5*Math.PI*2+0.3, e=new THREE.Vector3(Math.cos(a)*0.31,0.065,Math.sin(a)*0.31);
+    rod(new THREE.Vector3(0,0.095,0),e,0.02,nylon,chair,10);
+    const wheel=add(new THREE.Mesh(new THREE.CylinderGeometry(0.028,0.028,0.024,14),nylon),chair); wheel.rotation.z=Math.PI/2; wheel.rotation.y=a; wheel.position.set(e.x,0.028,e.z); }
+  rod(new THREE.Vector3(0,0.09,0),new THREE.Vector3(0,0.43,0),0.024,metal,chair,16);
+  rBox(0.2,0.04,0.2,0.02,nylon,0,0.44,0,chair); // the seat mechanism
+  // bucket seat with raised side bolsters and an accent insert
+  rBox(0.53,0.085,0.5,0.04,leather,0,0.5,0,chair);
+  [-0.245,0.245].forEach(x=>rBox(0.07,0.06,0.48,0.03,leather,x,0.565,0.0,chair));
+  rBox(0.3,0.012,0.4,0.006,accent,0,0.545,0.0,chair);
+  // armrests on posts
+  [-0.29,0.29].forEach(x=>{ rod(new THREE.Vector3(x,0.47,0.06),new THREE.Vector3(x,0.66,0.04),0.018,nylon,chair,10); rBox(0.08,0.03,0.25,0.014,nylon,x,0.675,0.01,chair); });
+  // the tall backrest, leaning back a little, with wings, an accent stripe on each side and a headrest pillow
+  const back=new THREE.Group(); back.position.set(0,0.53,0.24); back.rotation.x=-0.2; chair.add(back);
+  rBox(0.5,0.8,0.09,0.04,leather,0,0.42,0,back);
+  [-0.235,0.235].forEach(x=>{ rBox(0.075,0.62,0.11,0.035,leather,x,0.38,-0.02,back); rBox(0.028,0.6,0.012,0.006,accent,x*0.62,0.42,-0.05,back); });
+  rBox(0.27,0.13,0.07,0.035,accent,0,0.72,-0.07,back); // headrest pillow
+  rBox(0.3,0.12,0.06,0.03,accent,0,0.14,-0.06,back);  // lumbar pillow
+  contact(0.8,0.8,-0.85,0,0.3,.35,true); // a soft shadow on the floor
+  SEED=S0; }
+
 const spill=new THREE.Mesh(new THREE.PlaneGeometry(0.8,0.4),new THREE.MeshBasicMaterial({map:blobRound,color:0x9AA8C4,transparent:true,opacity:.09,blending:THREE.AdditiveBlending,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-4}));
 spill.rotation.x=-Math.PI/2; spill.position.set(MX,DY+0.0012,-0.62); spill.scale.set(1,1.1,1); scene.add(spill);
 
