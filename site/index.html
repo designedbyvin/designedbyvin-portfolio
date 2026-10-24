@@ -2789,6 +2789,30 @@ lampLight.target.position.copy(headWorld).addScaledVector(lampDirWorld,0.6);
 lampLight.castShadow=true; lampLight.shadow.mapSize.set(LOW_GPU?512:1024,LOW_GPU?512:1024); lampLight.shadow.normalBias=0.006; lampLight.shadow.bias=-0.0004; lampLight.shadow.camera.near=0.05;
 scene.add(lampLight,lampLight.target);
 const lampBounce=new THREE.PointLight(0xFFC88A,0.18,1.2,2); lampBounce.position.set(0.8,DY+0.12,-0.7); scene.add(lampBounce);
+/* ============ a small 24-hour digital clock on the desk, between the monitor and the lamp ============ */
+const deskClock=new THREE.Group(); deskClock.position.set(0.765,DY,-0.78); deskClock.rotation.y=-0.22; scene.add(deskClock);
+const CLK_W=0.118, CLK_H=0.048, CLK_D=0.04;
+const clockBody=add(new THREE.Mesh(rBoxGeo(CLK_W,CLK_H,CLK_D,0.009,4),std({color:0x1A1B1E,roughness:.42})),deskClock); clockBody.position.y=CLK_H/2+0.002;
+[-1,1].forEach(sx=>{ const ft=add(new THREE.Mesh(new THREE.CylinderGeometry(0.005,0.005,0.003,14),M.black),deskClock,false); ft.position.set(sx*CLK_W*0.34,0.0015,0); });
+const clockCv=mkCanvas(512,176), clockTex=toTex(clockCv);
+const SEG={0:'abcdef',1:'bc',2:'abged',3:'abgcd',4:'fgbc',5:'afgcd',6:'afgedc',7:'abc',8:'abcdefg',9:'abcdfg'};
+function drawClock(){ const g=clockCv.getContext('2d'), now=new Date(), s=String(now.getHours()).padStart(2,'0')+String(now.getMinutes()).padStart(2,'0');
+  g.fillStyle='#08090B'; g.fillRect(0,0,512,176);
+  const dw=78, dh=118, th=13, y0=29, xs=[44,140,276,372];
+  const seg=(x,y,k,on)=>{ g.fillStyle=on?'#FFB15C':'rgba(255,177,92,.07)'; g.beginPath(); const L=dw-th, V=dh/2-th/2, p=th/2;
+    const H=(x0,y0)=>{ g.moveTo(x0+p,y0); g.lineTo(x0+L-p,y0); g.lineTo(x0+L,y0+p); g.lineTo(x0+L-p,y0+th); g.lineTo(x0+p,y0+th); g.lineTo(x0,y0+p); };
+    const Vt=(x0,y0)=>{ g.moveTo(x0+p,y0); g.lineTo(x0+th,y0+p); g.lineTo(x0+th,y0+V-p); g.lineTo(x0+p,y0+V); g.lineTo(x0,y0+V-p); g.lineTo(x0,y0+p); };
+    ({a:()=>H(x+p,y),g:()=>H(x+p,y+dh/2-th/2),d:()=>H(x+p,y+dh-th),f:()=>Vt(x,y+p),b:()=>Vt(x+dw-th,y+p),e:()=>Vt(x,y+dh/2+p/2),c:()=>Vt(x+dw-th,y+dh/2+p/2)})[k](); g.closePath(); g.fill(); };
+  g.save(); g.shadowColor='rgba(255,150,60,.85)'; g.shadowBlur=14;
+  xs.forEach((x,i)=>{ const on=SEG[s[i]]; 'abcdefg'.split('').forEach(k=>{ if(on.indexOf(k)<0) seg(x,y0,k,false); }); });
+  xs.forEach((x,i)=>{ const on=SEG[s[i]]; on.split('').forEach(k=>seg(x,y0,k,true)); });
+  g.fillStyle='#FFB15C'; [[256,y0+34],[256,y0+dh-34]].forEach(([cx,cy])=>{ g.beginPath(); g.arc(cx,cy,7,0,Math.PI*2); g.fill(); });
+  g.restore(); clockTex.needsUpdate=true; return now.getHours()*60+now.getMinutes(); }
+let clockMin=drawClock();
+const clockFace=add(new THREE.Mesh(new THREE.PlaneGeometry(CLK_W-0.016,CLK_H-0.014),new THREE.MeshBasicMaterial({map:clockTex,toneMapped:false})),deskClock,false); clockFace.position.set(0,CLK_H/2+0.002,CLK_D/2+0.0004);
+const clockGlow=new THREE.PointLight(0xFF9A48,0.025,0.25,2); clockGlow.position.set(0,CLK_H/2,CLK_D/2+0.03); deskClock.add(clockGlow); // the digits faintly light the desk in front
+contact(0.15,0.07,0,0,0,.4,true,0,deskClock);
+setInterval(()=>{ const n=new Date(), m=n.getHours()*60+n.getMinutes(); if(m!==clockMin){ clockMin=drawClock(); if(window.wakeRoom) window.wakeRoom(); } },5000); // redraw only when the minute changes
 const bulbHalo=glowSprite(0xFFD9A8,0.12,.2); bulbHalo.position.copy(headWorld).addScaledVector(lampDirWorld,0.05); // bloom does most of the glow now
 
 /* ============ daylight ============ */
