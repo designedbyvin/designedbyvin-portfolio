@@ -138,6 +138,7 @@ body{background:#14120F;color:var(--ink);font-family:var(--body);overflow:hidden
 .item ul{margin:8px 0 0;padding-left:18px;line-height:1.6}
 .item .sub{margin:0;font:500 11px/1.4 var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--page-muted)}
 .item p{margin:0;font-size:15px;line-height:1.55;color:var(--page-fg)}
+.item .co{font-size:14px;color:var(--page-muted)}
 .acts{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:4px}
 .act{font:600 14px/1.2 var(--body);color:var(--page-fg);background:none;border:0;padding:4px 0;cursor:pointer;text-decoration:none;border-bottom:1px solid var(--page-line)}
 .act:hover{border-color:var(--page-fg)}
@@ -199,6 +200,27 @@ body{background:#14120F;color:var(--ink);font-family:var(--body);overflow:hidden
 .page-top button{font:500 13px/1 var(--body);color:var(--page-fg);background:transparent;border:1px solid var(--page-line);border-radius:999px;padding:9px 14px;cursor:pointer}
 .page-top button:hover{border-color:var(--page-fg)}
 .page-body{max-width:860px;margin:0 auto;padding:48px 24px 96px;display:grid;gap:40px}
+/* section navigation: a sticky list beside the page on wide screens, a "Sections" menu in the top bar on smaller ones */
+.p-sec-btn{margin-left:auto}
+#p-crumb{margin-left:auto}
+.page.has-toc #p-crumb + .p-sec-btn{margin-left:0}
+.p-toc{position:fixed;z-index:2;top:84px;left:24px;width:210px;max-height:calc(100% - 108px);overflow-y:auto;padding:4px 0}
+.p-toc .eyebrow{margin:0 0 10px 12px}
+.p-toc ol{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.p-toc a{display:grid;grid-template-columns:26px 1fr;gap:4px;align-items:baseline;padding:7px 10px;border-radius:8px;border-left:2px solid transparent;color:var(--page-muted);text-decoration:none;font:500 13.5px/1.3 var(--body)}
+.p-toc a span{font:500 10.5px/1 var(--mono);letter-spacing:.04em;color:var(--warm)}
+.p-toc a:hover{color:var(--page-fg);background:rgba(60,50,40,.05)}
+.p-toc a[aria-current="true"]{color:var(--page-fg);border-left-color:var(--warm);background:rgba(60,50,40,.06)}
+.p-toc a:focus-visible{outline:2px solid var(--page-fg);outline-offset:1px}
+@media (min-width:1120px){ .page.has-toc .page-body{margin-left:max(258px,calc(50% - 430px));margin-right:auto} .p-sec-btn{display:none} }
+@media (max-width:1119.98px){
+  .p-toc{top:62px;left:auto;right:16px;width:min(300px,calc(100vw - 32px));max-height:calc(100% - 78px);background:rgba(250,247,241,.98);border:1px solid var(--page-line);border-radius:14px;box-shadow:0 14px 40px rgba(40,30,20,.16);padding:12px 6px}
+  .page:not(.toc-open) .p-toc{display:none}
+  .page.has-toc .page-top{display:grid;grid-template-columns:1fr auto 1fr} /* back · Case study (centred) · Sections */
+  .page.has-toc #p-crumb{margin:0;justify-self:center;text-align:center}
+  .page.has-toc .p-sec-btn{justify-self:end;margin:0}
+  .page.has-toc #p-back{justify-self:start}
+}
 .page-head{display:grid;gap:12px}
 .page-head h1{margin:0;font:700 clamp(36px,6vw,56px)/1 var(--display);letter-spacing:-.025em;text-wrap:balance}
 .page-head .lede{margin:0;font-size:19px;line-height:1.55;max-width:58ch}
@@ -408,7 +430,8 @@ body{background:#14120F;color:var(--ink);font-family:var(--body);overflow:hidden
   </aside>
 
   <section class="page" id="page" hidden role="dialog" aria-labelledby="page-title">
-    <div class="page-top"><button type="button" id="p-back">← Back to room</button><p class="eyebrow" id="p-crumb">Case study</p></div>
+    <div class="page-top"><button type="button" id="p-back">← Back to room</button><p class="eyebrow" id="p-crumb">Case study</p><button type="button" id="p-sec-btn" class="p-sec-btn" aria-expanded="false" aria-controls="p-toc" hidden>Sections</button></div>
+    <nav class="p-toc" id="p-toc" aria-label="Sections in this case study" hidden><p class="eyebrow">On this page</p><ol id="p-toc-list"></ol></nav>
     <div class="page-body" id="p-body"></div>
   </section>
 </div>
@@ -593,7 +616,7 @@ const TRACKS = [
 let nowTrack=-1;
 const PANELS = {
   pinboard:{ eyebrow:'Pinboard', title:'Skills & tools', render:()=>SKILLS.concat([['Tools I use',TOOLS_USED]]).map(([t,l])=>`<article class="item"><h3>${t}</h3><ul>${l.map(x=>`<li>${x}</li>`).join('')}</ul></article>`).join('') },
-  career:{ eyebrow:'Career path', title:'Where I started, where I\u2019m heading', render:()=>`<article class="item"><p class="sub">01</p><h3>UI/UX Design Intern</h3></article><article class="item"><p class="sub">02</p><h3>UI/UX Designer</h3></article><article class="item"><p class="sub">03</p><h3>UI/UX Design Team Lead</h3></article><article class="item"><p class="sub">04 \u00b7 Next target</p><h3>Product Designer / Design Engineer</h3></article>` },
+  career:{ eyebrow:'Career path', title:'Where I started, where I\u2019m heading', render:()=>`<article class="item"><p class="sub">01</p><h3>UI/UX Design Intern</h3><p class="co">JAF Digital</p></article><article class="item"><p class="sub">02</p><h3>UI/UX Designer</h3><p class="co">Cosmotech Philippines, Inc.</p></article><article class="item"><p class="sub">03</p><h3>UI/UX Design Team Lead</h3><p class="co">Cosmotech Philippines, Inc.</p></article><article class="item"><p class="sub">04 \u00b7 Next target</p><h3>Product Designer / Design Engineer</h3></article>` },
   vinyl:{ eyebrow:'Record player', title:'Put a record on', render:()=>`<ul class="tracks">${TRACKS.map((t,i)=>`<li><button type="button" data-track="${i}" aria-current="${i===nowTrack}"><span class="no">${String(i+1).padStart(2,'0')}</span><span class="cv"><img src="${t.cover}" alt="" loading="lazy" onerror="this.remove()"></span><span>${t.title}<small>${t.artist}</small></span></button></li>`).join('')}</ul>${nowTrack>=0?'<button class="act" type="button" data-stop>Stop the record</button>':''}` },
   projects:{ eyebrow:'Work', title:'Projects', render:()=>PROJECTS.map(p=>`<article class="item"><p class="sub">${p.sub}</p><h3>${p.name}</h3><p>${p.summary}</p>${p.status?`<p class="sub">${p.status}</p>`:''}<div class="acts">${p.open?`<a class="act" href="${p.open[1]}" target="_blank" rel="noopener">${p.open[0]} ↗</a>`:''}${caseLink(p.id)}</div></article>`).join('') },
   caseStudies:{ eyebrow:'Case studies', title:'Selected work', render:()=>PROJECTS.map(p=>`<article class="item thumb"><img src="${IMG['case-'+p.id]||''}" alt="" width="96" height="72"><h3>${p.name}</h3><p class="sub">${p.sub}</p><p>${p.summary}</p><div class="acts">${caseLink(p.id)}</div></article>`).join('') },
@@ -724,15 +747,34 @@ function openCasePage(id){
     (c.bookPages?c.bookPages.map(blocksToHTML).join(''):c.sections.map(([h,b])=>`<section class="sec"><h2>${h}</h2>${b}</section>`).join(''))+
     (c.link?`<div class="acts-row"><a class="btn" href="${c.link[1]}" target="_blank" rel="noopener">${c.link[0]} ↗</a>${c.link2?`<a class="btn ghost" href="${c.link2[1]}" target="_blank" rel="noopener">${c.link2[0]} ↗</a>`:''}</div>`:'');
   pBody.querySelectorAll('img[data-shot]').forEach(im=>{ const src=(window.VIN_SHOTS||{})[im.dataset.shot]; if(src) im.src=src; else im.closest('figure').remove(); }); // real Dō screens
+  buildPageToc();
   pageEl.hidden=false; pageEl.scrollTop=0; $('p-back').focus({preventScroll:true});
 }
+/* section navigation for the full page: one entry per numbered section; continued pages belong to the section before them */
+const pToc=$('p-toc'), pTocList=$('p-toc-list'), pSecBtn=$('p-sec-btn'); let tocSecs=[];
+function setTocOpen(o){ pageEl.classList.toggle('toc-open',o); pSecBtn.setAttribute('aria-expanded',String(o)); }
+function buildPageToc(){ tocSecs=[]; pTocList.innerHTML=''; setTocOpen(false);
+  pBody.querySelectorAll('section.sec').forEach(sec=>{ const e=sec.querySelector('.eyebrow'), m=e&&e.textContent.match(/^(\d\d) · (.+)$/); if(!m) return;
+    sec.id='sec-'+m[1]; tocSecs.push(sec);
+    const li=document.createElement('li'); li.innerHTML=`<a href="#sec-${m[1]}"><span>${m[1]}</span>${esc(m[2])}</a>`;
+    li.firstChild.onclick=ev=>{ ev.preventDefault(); const top=sec.offsetTop-(pageEl.querySelector('.page-top').offsetHeight+16);
+      pageEl.scrollTo({top,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'}); setTocOpen(false); };
+    pTocList.appendChild(li); });
+  const has=tocSecs.length>1; pageEl.classList.toggle('has-toc',has); pToc.hidden=!has; pSecBtn.hidden=!has; markToc(); }
+function markToc(){ if(!tocSecs.length) return; const y=pageEl.scrollTop+pageEl.querySelector('.page-top').offsetHeight+40; let k=0;
+  tocSecs.forEach((s,i)=>{ if(s.offsetTop<=y) k=i; });
+  if(pageEl.scrollTop+pageEl.clientHeight>=pageEl.scrollHeight-4) k=tocSecs.length-1; // at the very bottom, the last section is the current one
+  pTocList.querySelectorAll('a').forEach((a,i)=>a.setAttribute('aria-current',String(i===k))); }
+pageEl.addEventListener('scroll',()=>{ if(!markToc.raf) markToc.raf=requestAnimationFrame(()=>{ markToc.raf=0; markToc(); }); },{passive:true});
+pSecBtn.onclick=()=>setTocOpen(!pageEl.classList.contains('toc-open'));
+pageEl.addEventListener('click',e=>{ if(pageEl.classList.contains('toc-open') && !e.target.closest('#p-toc,#p-sec-btn')) setTocOpen(false); });
 function closeCasePage(){ if(pageEl.hidden) return; pageEl.hidden=true; if(screenOpen) $('mon-close').focus({preventScroll:true}); else if(panelOpen) $('ctx-close').focus({preventScroll:true}); } // the room and panel are exactly as they were
 $('p-back').onclick=closeCasePage;
 let roomKey=()=>false; // the room handles keys while an object is being examined (arrows in the folder, Esc)
 window.addEventListener('keydown',e=>{
   if(e.target && e.target.closest && e.target.closest('input,textarea')) return;
   if(e.key!=='Escape'){ if(pageEl.hidden && !screenOpen && !panelOpen) roomKey(e); return; }
-  if(!pageEl.hidden) closeCasePage(); else if(screenOpen) closeScreen(); else if(panelOpen) closeContextPanel(); else if(!roomKey(e)) closeIdx(); });
+  if(!pageEl.hidden){ if(pageEl.classList.contains('toc-open')) setTocOpen(false); else closeCasePage(); } else if(screenOpen) closeScreen(); else if(panelOpen) closeContextPanel(); else if(!roomKey(e)) closeIdx(); });
 
 /* ---------- index: accessible list of everything in the room ---------- */
 let focusObject=(key)=>{ const o=FALLBACK_PANELS[key]; if(o) openContextPanel(o,'right'); }; // replaced by the room
@@ -2175,7 +2217,7 @@ function block(g,b,X,y,MW,s){
         let yy=para(g,th,X+cw,y-2*s,MW-cw,23*s,1.25,`600 ${23*s}px "Instrument Sans", sans-serif`,ink);
         y=para(g,f,X+cw,yy+1*s,MW-cw,20*s,1.4,`400 ${20*s}px "Instrument Sans", sans-serif`,muted)+10*s; });
       return y+8*s; }
-    case 'toc': { b.rows.forEach(([n,tl,pg])=>{ g.fillStyle='rgba(60,50,40,.16)'; g.fillRect(X,y,MW,1.5);
+    case 'toc': { b._hits=[]; b.rows.forEach(([n,tl,pg])=>{ b._hits.push([y,y+58*s,pg,tl]); g.fillStyle='rgba(60,50,40,.16)'; g.fillRect(X,y,MW,1.5);
         g.font=`500 ${18*s}px "JetBrains Mono", monospace`; g.fillStyle='#C98E62'; g.fillText(n,X,y+38*s);
         g.font=`500 ${25*s}px "Instrument Sans", sans-serif`; g.fillStyle=ink; g.fillText(tl.charAt(0).toUpperCase()+tl.slice(1),X+62*s,y+39*s);
         g.font=`500 ${16*s}px "JetBrains Mono", monospace`; g.fillStyle=muted; g.textAlign='right'; g.fillText(String(pg),X+MW,y+38*s); g.textAlign='left'; y+=58*s; });
@@ -2230,6 +2272,7 @@ function page(blocks,foot,bg,big){
     if(foot){ g.textAlign='right'; g.fillText(foot,PW-PMG,PHT-56); g.textAlign='left'; }
     if(y<=PHT-110) break;
   }
+  c.toc=[]; blocks.forEach(b=>{ if(b._hits) c.toc.push(...b._hits); }); // where each contents row sits on the page, for clicking
   return c;
 }
 const strip=s=>s.replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/\s+/g,' ').trim();
@@ -2262,7 +2305,7 @@ function folderPages(){
     else { const b=[]; c.sections.forEach(([hd,html])=>{ b.push({t:'h',text:hd}); htmlBlocks(html).forEach(x=>b.push(x)); }); P[id+'more']=[page(b,nm+' · 2')]; }
     SEED=S0;
     { const toc=c.bookPages?c.bookPages.map((bl,i)=>{ const k=(bl.find(x=>x.t==='kicker')||{}).text||''; const m=k.match(/(\d\d)\s+(.*)$/); return m?[m[1],m[2],i+2]:null; }).filter(Boolean) : c.sections.map(([hd],i)=>[String(i+1).padStart(2,'0'),hd,2]);
-      P[id+'inside']=page([{t:'gap',h:40},{t:'kicker',text:'In this folder'},{t:'title',text:c.title},{t:'lede',text:c.kicker.replace(/^Case study · /,'')},{t:'gap',h:20},{t:'toc',rows:toc},{t:'gap',h:24},{t:'p',text:coarse?'Tap the right page to turn forward, the left page to go back.':'Use ← → or click a page to turn it.'}],'',''+'#E9E2D5',true); }
+      P[id+'inside']=page([{t:'gap',h:40},{t:'kicker',text:'In this folder'},{t:'title',text:c.title},{t:'lede',text:c.kicker.replace(/^Case study · /,'')},{t:'gap',h:20},{t:'toc',rows:toc},{t:'gap',h:24},{t:'p',text:coarse?'Tap a section to go straight to it, or tap a page to turn it.':'Click a section to go straight to it. Use ← → or click a page to turn it.'}],'',''+'#E9E2D5',true); }
     P[id+'end']=page([{t:'gap',h:300},{t:'kicker',text:'End of '+nm},{t:'title',text:'Thanks for reading.'},{t:'lede',text:'More of my work lives on the monitor, and at '+ABOUT.site+'.'},{t:'p',text:ABOUT.name+' · '+ABOUT.role+' · '+ABOUT.place}],nm+' · '+(P[id+'more'].length+2)); });
   return P;
 }
@@ -2309,11 +2352,11 @@ label.geometry=new THREE.PlaneGeometry(0.085,0.11); label.position.set(FOLD_W/2-
 label.material.map=bookLabelTex[2]; label.material.needsUpdate=true;
 folder.visible=false;
 SEED=BOOKS_SEED;
-const sheets=[], sheetFaces=[], BOOK_PAGES=[], INSIDE_MATS=[]; let insideFace=null;
+const sheets=[], sheetFaces=[], BOOK_PAGES=[], INSIDE_MATS=[], INSIDE_TOC=[]; let insideFace=null;
 function buildPages(){ // called once the case previews exist
   const SB=SEED, P=folderPages();
   const inside=add(new THREE.Mesh(insideGeo,pageMat(P.inside)),cover,false); inside.position.y=0.0003; pageMeshes.push(inside); insideFace=inside;
-  BOOKS.forEach((bk,k)=>{ INSIDE_MATS[k]=P[bk.key+'inside']?pageMat(P[bk.key+'inside']):inside.material; });
+  BOOKS.forEach((bk,k)=>{ INSIDE_MATS[k]=P[bk.key+'inside']?pageMat(P[bk.key+'inside']):inside.material; INSIDE_TOC[k]=P[bk.key+'inside']?P[bk.key+'inside'].toc:[]; });
   inside.material=INSIDE_MATS[2];
   // per folder: sheet 1 = overview / details, sheet 2 = closing page / blank back
   const blank=pageMat(page([],''));
@@ -2709,7 +2752,8 @@ function careerCanvas(){ return canvasOf(1400,960,(g,w,h)=>{
   const L=[['UI/UX DESIGN','INTERN'],['UI/UX','DESIGNER'],['UI/UX DESIGN','TEAM LEAD'],['PRODUCT DESIGNER /','DESIGN ENGINEER']];
   g.textAlign='center';
   P.forEach(([x,y],i)=>{ if(i===3) return; g.fillStyle='rgba(42,38,34,.62)'; g.font='500 20px "JetBrains Mono", monospace'; g.fillText(['2024','2024','2025'][i],x,y+58); // the year each step began
-    g.fillStyle=i<3?'#2A2622':'rgba(42,38,34,.78)'; g.font='600 25px "Instrument Sans", sans-serif'; L[i].forEach((t,k)=>g.fillText(t,x,y+94+k*31)); });
+    g.fillStyle=i<3?'#2A2622':'rgba(42,38,34,.78)'; g.font='600 25px "Instrument Sans", sans-serif'; L[i].forEach((t,k)=>g.fillText(t,x,y+94+k*31));
+    g.fillStyle='rgba(42,38,34,.6)'; g.font='500 16px "JetBrains Mono", monospace'; g.fillText(['JAF DIGITAL','COSMOTECH PHILIPPINES, INC.','COSMOTECH PHILIPPINES, INC.'][i],x,y+94+2*31+6); }); // where each step happened
   // where next: a large question mark, no pin and no title of its own
   const [qx,qy]=CAREER_Q; g.textAlign='center';
 
@@ -3102,7 +3146,11 @@ function openBookFromMonitor(id){ const k=BOOKS.findIndex(b=>b.key===id); if(k<0
   if(active) returnToRoom(); setTimeout(()=>{ focusOn('folder'); openBook(k); },0); }
 function putBackBook(){ FOLDER.open=false; FOLDER.spread=0; goal=inspectGoal(OBJECTS.folder); renderBar(); }
 function turnFolder(d){ if(!FOLDER.open) return; const s=Math.max(0,Math.min(spreads().length-1,FOLDER.spread+d)); if(s!==FOLDER.spread){ FOLDER.spread=s; renderBar(); } }
-function folderClick(hit){ if(!FOLDER.open){ return; } const lx=folder.worldToLocal(hit.point.clone()).x; turnFolder(lx< -FOLD_W/2 ? -1 : 1); }
+// the contents page inside the cover: which row is under the pointer, and the spread that row's page is on
+function tocRowAt(hit){ if(!hit||hit.object!==insideFace||!hit.uv||FOLDER.spread!==0) return null; const rows=INSIDE_TOC[curBook]||[];
+  const x=hit.uv.x*PW, y=(1-hit.uv.y)*PHT; if(x<PMG-10||x>PW-PMG+10) return null; return rows.find(r=>y>=r[0]&&y<r[1])||null; }
+function gotoPage(pg){ const s=Math.max(0,Math.min(spreads().length-1,Math.floor((pg-2)/2)+1)); if(s!==FOLDER.spread){ FOLDER.spread=s; renderBar(); } }
+function folderClick(hit){ if(!FOLDER.open){ return; } const row=tocRowAt(hit); if(row){ gotoPage(row[2]); return; } const lx=folder.worldToLocal(hit.point.clone()).x; turnFolder(lx< -FOLD_W/2 ? -1 : 1); }
 function updateFolder(dt){
   const F=FOLDER, down=sheets.every(s=>s.userData.ang<0.25);
   F.lift=approach(F.lift, F.open?1:((down && cover.userData.ang<0.25)?0:1), dt*1.4);
@@ -3251,7 +3299,7 @@ const OBJECTS={
   folder:      {obj:caseStack, label:'Case studies', inspect:true, pose:()=>stackPose(),
                 enter:()=>{ curBook=-1; pendingBook=-1; glowBook(-1); },
                 exit:()=>{ FOLDER.open=false; FOLDER.spread=0; pendingBook=-1; glowBook(-1); },
-                hover:h=>{ if(FOLDER.open){ glowBook(-1); return h?(coarse?'Tap a page to turn it':'Click a page or use ← →'):null; }
+                hover:h=>{ if(FOLDER.open){ glowBook(-1); const row=tocRowAt(h); if(row) return `Go to ${row[3].charAt(0).toUpperCase()+row[3].slice(1)} · page ${row[2]}`; return h?(coarse?'Tap a page to turn it':'Click a page or use ← →'):null; }
                   const b=h?bookAt(h.point):-1; glowBook(b); return b>=0?`${BOOKS[b].name} · ${coarse?'double-tap':'double-click'} to open`:null; },
                 click:h=>{ if(FOLDER.open) folderClick(h); },
                 dbl:h=>{ if(FOLDER.open){ folderClick(h); return; } const b=bookAt(h.point); if(b>=0) openBook(b); },
