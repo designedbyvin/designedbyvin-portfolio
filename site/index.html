@@ -2504,6 +2504,27 @@ const recordT=canvasTex(1024,1024,(g,w,h)=>{
   g.font='500 15px "JetBrains Mono", monospace'; g.fillText('SIDE A  ·  33⅓',cx,cy+72);
   g.fillStyle='#1A1A1C'; g.beginPath(); g.arc(cx,cy,9,0,Math.PI*2); g.fill(); });
 const recordMat=std({map:recordT,roughness:.36,metalness:0});
+// while a song plays, the record becomes a picture disc of that song's album cover (made once per song, then reused)
+const REC_ART={for:-2, cache:{}};
+function drawPictureDisc(img){ return canvasTex(1024,1024,(g,w,h)=>{ const cx=w/2, cy=h/2;
+  g.fillStyle='#0C0C0E'; g.fillRect(0,0,w,h);
+  g.save(); g.beginPath(); g.arc(cx,cy,w*0.497,0,Math.PI*2); g.clip();
+  const s=Math.min(img.naturalWidth,img.naturalHeight); g.drawImage(img,(img.naturalWidth-s)/2,(img.naturalHeight-s)/2,s,s,0,0,w,h); // the cover, cropped square, fills the disc
+  for(let r=w*0.165;r<w*0.488;r+=2.4){ const gap=(Math.abs(Math.sin(r*0.031))>0.985); // fine grooves under the clear vinyl, with a few gaps between tracks
+    g.strokeStyle=gap?'rgba(0,0,0,.16)':`rgba(0,0,0,${0.06+0.06*(((r*13)|0)%3)/2})`; g.lineWidth=gap?1.6:0.8; g.beginPath(); g.arc(cx,cy,r,0,Math.PI*2); g.stroke(); }
+  const sh=g.createLinearGradient(0,0,w,h); sh.addColorStop(0,'rgba(255,255,255,.10)'); sh.addColorStop(.45,'rgba(255,255,255,0)'); sh.addColorStop(.55,'rgba(255,255,255,0)'); sh.addColorStop(1,'rgba(255,255,255,.07)'); g.fillStyle=sh; g.fillRect(0,0,w,h); // a soft gloss
+  g.strokeStyle='rgba(10,10,12,.9)'; g.lineWidth=w*0.014; g.beginPath(); g.arc(cx,cy,w*0.49,0,Math.PI*2); g.stroke(); // the rim
+  g.restore();
+  g.fillStyle='rgba(20,20,22,.9)'; g.beginPath(); g.arc(cx,cy,14,0,Math.PI*2); g.fill(); g.fillStyle='#050506'; g.beginPath(); g.arc(cx,cy,9,0,Math.PI*2); g.fill(); }); }
+function updateRecordArt(i){ if(i===REC_ART.for) return; REC_ART.for=i;
+  const show=tx=>{ recordMat.map=tx; recordMat.needsUpdate=true; if(window.wakeRoom) window.wakeRoom(); };
+  const tr=(typeof TRACKS!=='undefined' && i>=0)?TRACKS[i]:null; if(!tr || !tr.cover){ show(recordT); return; }
+  if(REC_ART.cache[i]){ show(REC_ART.cache[i]); return; }
+  const img=new Image(); img.onload=()=>{ try{ const tx=drawPictureDisc(img); tx.anisotropy=aniso; REC_ART.cache[i]=tx; if(REC_ART.for===i) show(tx); }catch(e){ if(REC_ART.for===i) show(recordT); } };
+  img.onerror=()=>{ if(REC_ART.for===i) show(recordT); }; img.src=tr.cover; }
+// the platter only turns while the record player is in view (near the middle of the screen, or opened); it picks up at full speed when you look back
+const recNdc=new THREE.Vector3(); let recSpinning=false;
+function recordInView(){ if(active==='vinyl') return true; recDisc.getWorldPosition(recNdc); recNdc.project(camera); return recNdc.z<1 && Math.abs(recNdc.x)<0.72 && Math.abs(recNdc.y)<0.8; }
 let spinV=0; // platter speed: eases up to 33⅓ rpm when a record plays and coasts down when it stops
 const spinGrp=new THREE.Group(); spinGrp.position.set(-0.035,0.0775,0.005); RP.add(spinGrp);
 add(new THREE.Mesh(new THREE.CylinderGeometry(0.152,0.152,0.012,72),M.alu),spinGrp).position.y=0.006;     // platter
@@ -3565,12 +3586,12 @@ function loop(){
   const nowMs=performance.now(), idleFor=nowMs-lastInput, busy=!revealed || idleFor<1000 || nowMs-lastMoveAt<400;
   // still view: nothing outside moves, so the room only checks for changes twice a second; a playing record keeps 24 fps so it turns smoothly
   updatePlane(nowMs); if(!reduce) updateYachts(nowMs);
-  const cap=busy?46:playingNow()?(winFocused?24:8):PLANE.on?(winFocused?15:4):(winFocused?(reduce?2:8):1); // slow yachts on the bay need only 8 fps // the plane flies at 15 fps when nothing else moves
+  const cap=busy?46:recSpinning?(winFocused?24:8):PLANE.on?(winFocused?15:4):(winFocused?(reduce?2:8):1); // slow yachts on the bay need only 8 fps // the plane flies at 15 fps when nothing else moves
   if(document.hidden || (!needFrame && nowMs-lastFrameAt < 1000/cap)){ requestAnimationFrame(loop); return; }
   needFrame=false;
   lastFrameAt=nowMs; if(busy) lastBusyAt=nowMs;
   renderer.shadowMap.needsUpdate = warmFrames++<8 || nowMs-lastBusyAt<1500; // shadows only change while things move
-  const dt=Math.min(clock.getDelta(),0.05); adaptRes(nowMs,busy); const adt=(busy||playingNow())?dt:0; animT+=adt; const t=animT, k=reduce?1:1-Math.exp(-dt*(goal?4.6:3.4));
+  const dt=Math.min(clock.getDelta(),0.05); adaptRes(nowMs,busy); const adt=(busy||recSpinning)?dt:0; animT+=adt; const t=animT, k=reduce?1:1-Math.exp(-dt*(goal?4.6:3.4));
   if(goal){ tmp.copy(goal.pos); tmpL.copy(goal.look); }
   else {
     yaw+=(tYaw+(reduce?0:mx*0.06)-yaw)*k; tilt+=(tTilt+(reduce?0:my*0.03)-tilt)*k;
@@ -3588,7 +3609,10 @@ function loop(){
     dustGeo.attributes.position.needsUpdate=true;
     updateGlass(adt);
     { const playing=typeof recAudio!=='undefined' && typeof nowTrack!=='undefined' && nowTrack>=0 && !recAudio.paused; // the record turns only while a track plays
-      spinV+=((playing?3.49:0)-spinV)*Math.min(1,dt*(playing?1.6:1.1)); if(spinV>0.002) spinGrp.rotation.y-=spinV*dt; }
+      updateRecordArt(typeof nowTrack!=='undefined'?nowTrack:-1);
+      const seen=recordInView(); recSpinning=playing && seen;
+      if(playing && !seen){ spinV=3.49; } // out of view: held still, already up to speed for when you look back
+      else { spinV+=((playing?3.49:0)-spinV)*Math.min(1,dt*(playing?1.6:1.1)); if(spinV>0.002) spinGrp.rotation.y-=spinV*dt; } }
     redLights.forEach(l=>{ l.material.opacity=night?.7:0; }); // steady aircraft-warning lights
     for(let i=0;i<SN;i++){ sLife[i]+=adt*0.22; if(sLife[i]>1) sLife[i]-=1; const l=sLife[i];
       sPos[i*3]=MGX+Math.sin(l*6+i)*0.012*l; sPos[i*3+1]=DY+0.085+l*0.15; sPos[i*3+2]=MGZ+Math.cos(l*5+i*2)*0.01*l; }
