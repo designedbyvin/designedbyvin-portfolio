@@ -96,7 +96,7 @@ body{background:#14120F;color:var(--ink);font-family:var(--body);overflow:hidden
 .ld-window::before,.ld-window::after{content:"";position:absolute;background:#1A1714;z-index:2}
 .ld-window::before{left:50%;top:0;bottom:0;width:10px;margin-left:-5px}
 .ld-window::after{left:0;right:0;top:44%;height:8px}
-.ld-city{position:absolute;left:0;right:0;bottom:0;width:100%;height:74%}
+.ld-city{position:absolute;left:-2%;right:-2%;bottom:-2%;width:104%;height:76%;filter:blur(6px) saturate(115%)} /* far away and well out of focus: the city reads as soft lights */
 .ld-water{position:absolute;left:0;right:0;bottom:0;height:9%;background:linear-gradient(180deg,rgba(243,198,140,.10),rgba(5,7,13,.9))}
 .ld-lamp{position:absolute;right:-12%;top:-22%;width:70vmax;height:70vmax;border-radius:50%;background:radial-gradient(circle,rgba(255,196,128,.22) 0%,rgba(255,170,96,.08) 34%,rgba(255,170,96,0) 62%)}
 .ld-desk{position:absolute;left:0;right:0;bottom:0;height:24%;background:linear-gradient(180deg,#5A3B24 0%,#3E2817 7%,#2A1B10 60%,#1C130B 100%);box-shadow:0 -1px 0 rgba(255,214,170,.18),0 -30px 60px rgba(0,0,0,.45);filter:blur(1.2px)}
@@ -2559,19 +2559,20 @@ const RP=new THREE.Group(); RP.position.set(0.035,ST.h,-0.05); RP.rotation.y=0.0
 rBox(0.36,0.07,0.3,0.008,walnutDark,0,0.006+0.035,0,RP);
 [[-0.15,-0.12],[0.15,-0.12],[-0.15,0.12],[0.15,0.12]].forEach(([x,z])=>{ add(new THREE.Mesh(new THREE.CylinderGeometry(0.012,0.012,0.006,16),M.rubber),RP).position.set(x,0.003,z); });
 const rpDeck=add(new THREE.Mesh(new THREE.BoxGeometry(0.352,0.002,0.292),M.alu),RP,false); rpDeck.position.y=0.0765; rpDeck.receiveShadow=true;
-const recordT=canvasTex(1024,1024,(g,w,h)=>{
+const recordC=mkCanvas(1024,1024); ((g,w,h)=>{
   const cx=w/2, cy=h/2; g.fillStyle='#0C0C0E'; g.fillRect(0,0,w,h);
   for(let r=w*0.17;r<w*0.497;r+=1.2){ const gap=(Math.abs(Math.sin(r*0.031))>0.985); g.strokeStyle=gap?'rgba(80,80,88,.6)':`rgba(${30+R()*14|0},${30+R()*14|0},${34+R()*14|0},.9)`; g.lineWidth=gap?1.6:0.8; g.beginPath(); g.arc(cx,cy,r,0,Math.PI*2); g.stroke(); }
   g.fillStyle='#E9DCC2'; g.beginPath(); g.arc(cx,cy,w*0.165,0,Math.PI*2); g.fill();
   g.strokeStyle='#C9643C'; g.lineWidth=10; g.beginPath(); g.arc(cx,cy,w*0.145,0,Math.PI*2); g.stroke();
   g.fillStyle='#2A2522'; g.textAlign='center'; g.font='700 30px "Bricolage Grotesque", sans-serif'; g.fillText('vin',cx,cy-58);
   g.font='500 15px "JetBrains Mono", monospace'; g.fillText('SIDE A  ·  33⅓',cx,cy+72);
-  g.fillStyle='#1A1A1C'; g.beginPath(); g.arc(cx,cy,9,0,Math.PI*2); g.fill(); });
+  g.fillStyle='#1A1A1C'; g.beginPath(); g.arc(cx,cy,9,0,Math.PI*2); g.fill(); })(recordC.getContext('2d'),1024,1024);
+const recordT=toTex(recordC); // kept as a canvas too, so a song's cover can be drawn over it
 const recordMat=std({map:recordT,roughness:.36,metalness:0});
 // while a song plays, the record's centre label shows that song's album cover (made once per song, then reused)
 const REC_ART={for:-2, cache:{}};
 function drawPictureDisc(img){ return canvasTex(1024,1024,(g,w,h)=>{ const cx=w/2, cy=h/2, lr=w*0.165;
-  g.drawImage(recordT.image,0,0,w,h); // the same black grooved record
+  g.drawImage(recordC,0,0,w,h); // the same black grooved record
   g.save(); g.beginPath(); g.arc(cx,cy,lr,0,Math.PI*2); g.clip();
   const s=Math.min(img.naturalWidth,img.naturalHeight); g.drawImage(img,(img.naturalWidth-s)/2,(img.naturalHeight-s)/2,s,s,cx-lr,cy-lr,lr*2,lr*2); // the cover, cropped square, fills the label
   const sh=g.createLinearGradient(cx-lr,cy-lr,cx+lr,cy+lr); sh.addColorStop(0,'rgba(255,255,255,.10)'); sh.addColorStop(.5,'rgba(255,255,255,0)'); sh.addColorStop(1,'rgba(0,0,0,.10)'); g.fillStyle=sh; g.fillRect(cx-lr,cy-lr,lr*2,lr*2);
@@ -3666,12 +3667,12 @@ function loop(){
     np3.set(0,0.33,0); RP.localToWorld(np3); np3.project(camera);
     if(np3.z>1){ npEl.style.visibility='hidden'; } else { npEl.style.visibility=''; npEl.style.left=((np3.x*0.5+0.5)*canvas.clientWidth)+'px'; npEl.style.top=((-np3.y*0.5+0.5)*canvas.clientHeight)+'px'; } }
   updateCard(dt); updateFolder(dt); updateNote(dt); updateCert(dt); updateCareer(dt);
+  updateRecordArt(typeof nowTrack!=='undefined'?nowTrack:-1); // the playing song's cover on the record's label (also with reduced motion)
   if(!reduce){
     for(let i=0;i<DN;i++){ const b=dBase[i], s=dSeed[i]; dPos[i*3]=b.x+Math.sin(t*0.12+s)*0.05; dPos[i*3+1]=b.y+Math.sin(t*0.09+s*1.7)*0.06; dPos[i*3+2]=b.z+Math.cos(t*0.1+s)*0.05; }
     dustGeo.attributes.position.needsUpdate=true;
     updateGlass(adt);
     { const playing=typeof recAudio!=='undefined' && typeof nowTrack!=='undefined' && nowTrack>=0 && !recAudio.paused; // the record turns only while a track plays
-      updateRecordArt(typeof nowTrack!=='undefined'?nowTrack:-1);
       const seen=recordInView(); recSpinning=playing && seen;
       if(playing && !seen){ spinV=3.49; } // out of view: held still, already up to speed for when you look back
       else { spinV+=((playing?3.49:0)-spinV)*Math.min(1,dt*(playing?1.6:1.1)); if(spinV>0.002) spinGrp.rotation.y-=spinV*dt; } }
