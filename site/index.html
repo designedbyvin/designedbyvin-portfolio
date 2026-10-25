@@ -3650,7 +3650,7 @@ function loop(){
   needFrame=false;
   lastFrameAt=nowMs; if(busy) lastBusyAt=nowMs;
   renderer.shadowMap.needsUpdate = warmFrames++<8 || nowMs-lastBusyAt<1500; // shadows only change while things move
-  const dt=Math.min(clock.getDelta(),0.05); adaptRes(nowMs,busy); const adt=(busy||recSpinning)?dt:0; animT+=adt; const t=animT, k=reduce?1:1-Math.exp(-dt*(goal?4.6:3.4));
+  const dt=Math.min(clock.getDelta(),0.05); adaptRes(nowMs,busy); const adt=(busy||recSpinning)?dt:0; animT+=adt; const t=animT, k=reduce?1:1-Math.exp(-dt*(goal?(introGlide?8.5:4.6):3.4));
   if(goal){ tmp.copy(goal.pos); tmpL.copy(goal.look); }
   else {
     yaw+=(tYaw+(reduce?0:mx*0.06)-yaw)*k; tilt+=(tTilt+(reduce?0:my*0.03)-tilt)*k;
@@ -3701,7 +3701,8 @@ function introRoom(){
   setTimeout(()=>{ setLoad(1,'Ready'); hideLoader(); 
     let took=false; const mark=()=>{ took=true; }; ['pointerdown','wheel','keydown','touchstart'].forEach(ev=>window.addEventListener(ev,mark,{once:true,passive:true}));
     setTimeout(()=>{ if(active || took){ typeWelcome(); return; } // the visitor has already started looking around (a click, drag, scroll or key): leave the view to them
-      focusOn('monitor'); setTimeout(typeWelcome,reduce?0:1200); }, reduce?600:2600); },350); }
+      introGlide=true; focusOn('monitor'); setTimeout(()=>{ introGlide=false; typeWelcome(); },reduce?0:750); }, reduce?600:1800); },350); }
+let introGlide=false; // the first move in to the monitor is quicker than an ordinary one
 function restoreDeferred(n){ for(let i=0;i<n && DEFER.length;i++){ DEFER.shift().traverse(m=>{ if(m.userData.lm!==undefined){ m.layers.mask=m.userData.lm; delete m.userData.lm; } }); } warmFrames=0;
   if(!DEFER.length) setTimeout(()=>{ upgradeMaterials().catch(()=>{}); },900); }
 OS.s=osScale(); drawOS(); screenMesh.material.map=osTex; screenMesh.material.needsUpdate=true;
