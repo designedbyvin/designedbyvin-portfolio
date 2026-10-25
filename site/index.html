@@ -2714,7 +2714,7 @@ function panelDoor(parent,w,h,t,frame,panel,cx,y0,z,opt){ const o=Object.assign(
 { const XE=2.4, DZ=1.0, DW=0.82, DH=2.04, CW=0.075, LIN=0.07; // the right-hand wall, about half a metre past the record player; the door is on it. LIN: how far its lining stands out
   // right-hand wall: the same plaster as the back wall, at the same texture scale, toned to match. It faces the sconce close up, so plain paint reads too white
   const rwTex=tx=>{ const c=tx.clone(); c.repeat.set(4.4/1.03,WH/1.375); c.needsUpdate=true; return c; };
-  const rwMat=std({map:rwTex(TX.paint.map),normalMap:rwTex(TX.paint.normal),normalScale:nsc(.6),roughnessMap:rwTex(TX.paint.rough),roughness:1,color:0xB9B1A5});
+  const rwMat=std({map:rwTex(TX.paint.map),normalMap:rwTex(TX.paint.normal),normalScale:nsc(.6),roughnessMap:rwTex(TX.paint.rough),roughness:1,color:0x8C8E95}); // a cooler, darker base: under the orange sconce right in front of it, it comes out the same beige as the left wall
   boxMesh(0.12,WH,4.4,rwMat,XE+0.06,WH/2,1.1);
   rBox(0.016,0.1,4.4,0.003,M.trim,XE-0.008,0.05,1.1); rBox(0.03,0.03,4.4,0.008,M.trim,XE-0.015,WH-0.015,1.1);
   aoStrip(WH,0.3,new THREE.Vector3(XE-0.001,WH/2,WF+0.15),[0,-Math.PI/2,-Math.PI/2],.24);
