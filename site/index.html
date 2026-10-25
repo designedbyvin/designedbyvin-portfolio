@@ -2711,13 +2711,13 @@ function panelDoor(parent,w,h,t,frame,panel,cx,y0,z,opt){ const o=Object.assign(
   aoStrip(1.32,0.26,new THREE.Vector3(SWX+0.016+D+0.13,0.0015,WZC),[-Math.PI/2,0,-Math.PI/2],.3); }
 
 /* ============ the right end of the room: the wall carries on past the record player to a door ============ */
-{ const XE=3.3, DX=2.45, DW=0.82, DH=2.04, CW=0.075, LIN=0.07; // LIN: how far the door lining stands out from the wall
+{ const XE=3.3, DZ=-0.2, DW=0.82, DH=2.04, CW=0.075, LIN=0.07; // the door is on the inside wall, on the right; LIN: how far its lining stands out
   boxMesh(XE-2.8,WH,WT,M.paint,(2.8+XE)/2,WH/2,WZ);                                            // back wall, continued
   boxMesh(0.12,WH,4.4,M.paint,XE+0.06,WH/2,1.1);                                                // right-hand wall
   rBox(XE-2.8,0.1,0.016,0.003,M.trim,(2.8+XE)/2,0.05,WF+0.008); rBox(0.016,0.1,4.4,0.003,M.trim,XE-0.008,0.05,1.1);
   rBox(XE-2.8,0.03,0.03,0.008,M.trim,(2.8+XE)/2,WH-0.015,WF+0.015); rBox(0.03,0.03,4.4,0.008,M.trim,XE-0.015,WH-0.015,1.1);
   aoStrip(WH,0.3,new THREE.Vector3(XE-0.001,WH/2,WF+0.15),[0,-Math.PI/2,-Math.PI/2],.24);
-  const door=new THREE.Group(); door.position.set(DX,0,WF); scene.add(door);
+  const door=new THREE.Group(); door.position.set(XE,0,DZ); door.rotation.y=-Math.PI/2; scene.add(door); // faces into the room, across from the wardrobe
   const jamb=std({color:0xE3DCCF,roughness:.5,normalMap:TX.plastic.normal,normalScale:nsc(.1)});
   // a deep lining so the door sits back in its frame, like a real opening, with casing around it
   [-1,1].forEach(s=>{ rBox(0.022,DH+0.01,LIN,0.003,jamb,s*(DW/2+0.011),(DH+0.01)/2,LIN/2,door);          // side linings
@@ -2736,7 +2736,67 @@ function panelDoor(parent,w,h,t,frame,panel,cx,y0,z,opt){ const o=Object.assign(
   rBox(0.13,0.016,0.018,0.007,brass,DW/2-0.12,1.0,zf+0.055,door);                                      // lever
   const plate=add(new THREE.Mesh(new THREE.CylinderGeometry(0.012,0.012,0.006,20),brass),door); plate.rotation.x=Math.PI/2; plate.position.set(DW/2-0.075,0.9,zf+0.003); // keyhole escutcheon
   rBox(DW+0.044,0.012,0.09,0.003,walnutDark,0,0.006,0.03,door);                                         // threshold
-  contact(1.15,0.3,DX,0,WF+0.16,.34,false,0); }
+  contact(0.3,1.15,XE-0.16,0,DZ,.34,false,0); }
+
+/* ============ the corner past the record player: a crate of records with a ledge above, and the helmet and jacket by the door ============ */
+{ const SB=SEED; // the sleeves' artwork uses the shared random stream: put it back afterwards so nothing else in the room moves
+  const pine=std({map:TX.desk.map,normalMap:TX.desk.normal,normalScale:nsc(.3),roughness:.85,color:0xD9B48C});
+  const brass=std({color:0xB8955A,roughness:.3,metalness:.85});
+  const sleeve=(i,parent)=>{ const art=std({map:toTex(coverArt(i)),roughness:.72}), edge=std({color:sleeveSpine[i%sleeveSpine.length],roughness:.8});
+    return add(new THREE.Mesh(new THREE.BoxGeometry(0.31,0.31,0.0045),[edge,edge,edge,edge,art,art]),parent); };
+  // a slatted pine crate on the floor, full of records
+  const CX=1.98, CZ=WF+0.21, cw=0.38, cd=0.36, ch=0.3;
+  const crate=new THREE.Group(); crate.position.set(CX,0,CZ); crate.rotation.y=-0.06; scene.add(crate);
+  rBox(cw,0.014,cd,0.002,pine,0,0.007,0,crate);                                                         // bottom
+  [[0,1],[0,-1]].forEach(([_,s])=>{ [0.045,0.2].forEach(y=>rBox(cw,0.085,0.014,0.003,pine,0,y+0.0425,s*(cd/2-0.007),crate)); }); // front and back slats
+  [-1,1].forEach(s=>{ [0.045,0.2].forEach(y=>rBox(0.014,0.085,cd-0.028,0.003,pine,s*(cw/2-0.007),y+0.0425,0,crate));
+    rBox(0.016,ch,0.016,0.003,pine,s*(cw/2-0.008),ch/2,cd/2-0.008,crate); rBox(0.016,ch,0.016,0.003,pine,s*(cw/2-0.008),ch/2,-(cd/2-0.008),crate); }); // corner posts
+  [-1,1].forEach(s=>rBox(0.07,0.022,0.016,0.008,std({color:0x1A1714,roughness:.9}),s*(cw/2+0.001),0.24,0,crate).rotation.y=Math.PI/2); // hand holes
+  [1,3,5,7,8,9,0,10,11,12].forEach((k,n)=>{ const s=sleeve(k%10,crate); s.position.set(0,0.014+0.155,cd/2-0.04-n*0.028); s.rotation.x=-0.16+n*0.012; }); // flipped forward a little, like a crate you've been browsing
+  contact(0.5,0.48,CX,0,CZ,.42,false,-0.06);
+  // a picture ledge above it, showing three favourites
+  const LY=1.22; rBox(0.74,0.022,0.075,0.003,walnutTable,CX,LY,WF+0.0375); rBox(0.74,0.03,0.012,0.003,walnutTable,CX,LY+0.026,WF+0.069);
+  [[-0.24,3,0.02],[0.0,7,-0.01],[0.24,1,0.015]].forEach(([dx,k,r])=>{ const s=sleeve(k,scene); s.position.set(CX+dx,LY+0.011+0.155,WF+0.035); s.rotation.set(-0.07,0,r); });
+  aoStrip(0.76,0.12,new THREE.Vector3(CX,LY-0.07,WF+0.001),[0,0,Math.PI],.22);
+  SEED=SB;
+
+  // the helmet: an ivory retro full-face with a dark smoked visor, sitting on a wall mount
+  const HX=2.64, HY=1.46, HZ=WF+0.17;
+  const mount=new THREE.Group(); mount.position.set(HX,HY,WF); scene.add(mount);
+  rBox(0.07,0.09,0.012,0.004,walnutDark,0,-0.02,0.006,mount);                                          // wall plate
+  const arm=add(new THREE.Mesh(new THREE.CylinderGeometry(0.011,0.011,0.13,14),brass),mount); arm.rotation.x=Math.PI/2; arm.position.set(0,-0.02,0.07);
+  add(new THREE.Mesh(new THREE.SphereGeometry(0.03,18,12),walnutDark),mount).position.set(0,0.0,0.14); // the ball the helmet rests on
+  const helmet=new THREE.Group(); helmet.position.set(HX,HY+0.115,HZ); helmet.rotation.set(0.06,0.55,0); scene.add(helmet);
+  const shell=phys({color:0xEDE3CB,roughness:.32,clearcoat:.9,clearcoatRoughness:.18});
+  const visor=phys({color:0x101114,roughness:.06,metalness:.25,clearcoat:1,clearcoatRoughness:.04});
+  const S=new THREE.Vector3(1,1.06,1.16), R0=0.128;
+  const sh=add(new THREE.Mesh(new THREE.SphereGeometry(R0,56,40,0,Math.PI*2,0,Math.PI*0.82),shell),helmet); sh.scale.copy(S);      // the shell, open underneath
+  const vz=add(new THREE.Mesh(new THREE.SphereGeometry(R0*1.012,48,24,Math.PI/2-0.92,1.84,Math.PI*0.37,Math.PI*0.23),visor),helmet); vz.scale.copy(S); // the visor across the face
+  const vr=add(new THREE.Mesh(new THREE.SphereGeometry(R0*1.016,48,4,Math.PI/2-0.95,1.9,Math.PI*0.355,Math.PI*0.018),shell),helmet); vr.scale.copy(S); // visor's top lip
+  const rub=std({color:0x161616,roughness:.8});
+  const neck=add(new THREE.Mesh(new THREE.TorusGeometry(0.064,0.014,12,40),rub),helmet); neck.rotation.x=Math.PI/2; neck.scale.set(1,1.16,1); neck.position.y=-R0*1.06*0.84; // padded neck roll
+  [-1,1].forEach(s=>{ const p=add(new THREE.Mesh(new THREE.CylinderGeometry(0.016,0.016,0.008,22),std({color:0xC9CCD1,roughness:.2,metalness:1})),helmet);
+    p.rotation.z=Math.PI/2; p.position.set(s*R0*1.0,-0.002,0.012); });                                  // chrome visor pivots
+  const strap=std({color:0x1C1C1E,roughness:.85});
+  [-1,1].forEach(s=>{ const st=add(new THREE.Mesh(new THREE.BoxGeometry(0.006,0.11,0.022),strap),helmet); st.position.set(s*0.07,-0.16,0.02); st.rotation.z=s*0.18; }); // chin strap hanging down
+
+  // a riding jacket hanging from a brass hook on a walnut peg board
+  const JX=3.01, JY=1.74, JZ=WF;
+  rBox(0.3,0.07,0.018,0.004,walnutTable,JX,JY+0.035,JZ+0.009);
+  [-0.08,0.08].forEach(dx=>{ const hk=add(new THREE.Mesh(new THREE.TorusGeometry(0.018,0.0045,8,20,Math.PI*1.2),brass)); hk.position.set(JX+dx,JY+0.02,JZ+0.04); hk.rotation.set(0,Math.PI/2,Math.PI*0.9); });
+  const jk=std({color:0x26272B,roughness:.78,normalMap:TX.felt.normal,normalScale:nsc(.35)}), jkTrim=std({color:0x9E2A25,roughness:.7});
+  const js=new THREE.Shape(); // the jacket's outline as it hangs: shoulders, sleeves down the sides, a slightly gathered hem
+  js.moveTo(-0.05,0); js.quadraticCurveTo(0,-0.03,0.05,0); js.lineTo(0.2,-0.07); js.quadraticCurveTo(0.24,-0.1,0.25,-0.18); js.lineTo(0.27,-0.6); js.lineTo(0.2,-0.61); js.lineTo(0.19,-0.3);
+  js.lineTo(0.185,-0.64); js.quadraticCurveTo(0,-0.67,-0.185,-0.64); js.lineTo(-0.19,-0.3); js.lineTo(-0.2,-0.61); js.lineTo(-0.27,-0.6); js.lineTo(-0.25,-0.18); js.quadraticCurveTo(-0.24,-0.1,-0.2,-0.07); js.closePath();
+  const jg=new THREE.ExtrudeGeometry(js,{depth:0.05,bevelEnabled:true,bevelThickness:0.025,bevelSize:0.018,bevelSegments:4,curveSegments:10});
+  const jacket=add(new THREE.Mesh(jg,jk)); jacket.position.set(JX+0.08,JY+0.01,JZ+0.03); jacket.rotation.set(0.03,0,0.02); jacket.scale.set(0.78,0.86,1);
+  const zip=add(new THREE.Mesh(new THREE.BoxGeometry(0.006,0.5,0.004),std({color:0xB9BCC2,roughness:.3,metalness:.9}))); zip.position.set(JX+0.08,JY-0.3,JZ+0.108);
+  [-1,1].forEach(s=>{ const st=add(new THREE.Mesh(new THREE.BoxGeometry(0.02,0.36,0.004),jkTrim)); st.position.set(JX+0.08+s*0.155,JY-0.27,JZ+0.104); st.rotation.z=-s*0.02; }); // red racing stripes
+  const col=add(new THREE.Mesh(new THREE.BoxGeometry(0.12,0.035,0.06),jk)); col.position.set(JX+0.08,JY-0.005,JZ+0.07); // collar
+  const jsh=new THREE.Mesh(new THREE.PlaneGeometry(0.5,0.66),new THREE.MeshBasicMaterial({color:0,alphaMap:blobRect,transparent:true,opacity:.32,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-4}));
+  jsh.position.set(JX+0.1,JY-0.32,JZ+0.0012); jsh.renderOrder=2; scene.add(jsh);                       // its soft shadow on the wall
+  const hsh=jsh.clone(); hsh.scale.set(0.62,0.5,1); hsh.position.set(HX+0.02,HY+0.08,WF+0.0012); scene.add(hsh); // and the helmet's
+}
 
 /* ============ low sideboard with an open shoe rack, against the left wall ============ */
 const CB={W:0.9, D:0.32, H:0.75};
