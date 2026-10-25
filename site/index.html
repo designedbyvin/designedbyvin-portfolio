@@ -2711,7 +2711,7 @@ function panelDoor(parent,w,h,t,frame,panel,cx,y0,z,opt){ const o=Object.assign(
   aoStrip(1.32,0.26,new THREE.Vector3(SWX+0.016+D+0.13,0.0015,WZC),[-Math.PI/2,0,-Math.PI/2],.3); }
 
 /* ============ the right end of the room: the wall carries on past the record player to a door ============ */
-{ const XE=2.1, DZ=1.0, DW=0.82, DH=2.04, CW=0.075, LIN=0.07; // the right-hand wall, about half a metre past the record player; the door is on it. LIN: how far its lining stands out
+{ const XE=2.4, DZ=1.0, DW=0.82, DH=2.04, CW=0.075, LIN=0.07; // the right-hand wall, about half a metre past the record player; the door is on it. LIN: how far its lining stands out
   boxMesh(0.12,WH,4.4,M.paint,XE+0.06,WH/2,1.1);                                                // right-hand wall
   rBox(0.016,0.1,4.4,0.003,M.trim,XE-0.008,0.05,1.1); rBox(0.03,0.03,4.4,0.008,M.trim,XE-0.015,WH-0.015,1.1);
   aoStrip(WH,0.3,new THREE.Vector3(XE-0.001,WH/2,WF+0.15),[0,-Math.PI/2,-Math.PI/2],.24);
@@ -3596,7 +3596,7 @@ canvas.addEventListener('pointerdown',e=>{ if(active && !inspecting()) return; d
 canvas.addEventListener('pointermove',e=>{
   const r=canvas.getBoundingClientRect(); mx=((e.clientX-r.left)/r.width)*2-1; my=((e.clientY-r.top)/r.height)*2-1;
   if(drag){ if(Math.hypot(e.clientX-drag.sx,e.clientY-drag.sy)>(coarse?10:5)) drag.moved=true;
-    if(!active){ const dx=e.clientX-drag.x, dy=e.clientY-drag.y; if(drag.moved){ tYaw=Math.max(-.5,Math.min(.5,tYaw-dx*0.004)); tTilt=Math.max(-.22,Math.min(.18,tTilt+dy*0.003)); } }
+    if(!active){ const dx=e.clientX-drag.x, dy=e.clientY-drag.y; if(drag.moved){ tYaw=Math.max(-.5,Math.min(.42,tYaw-dx*0.004)); /* the room's right-hand wall: turning further would take the camera through it */ tTilt=Math.max(-.22,Math.min(.18,tTilt+dy*0.003)); } }
     drag.x=e.clientX; drag.y=e.clientY; return; }
   if(active){
     if(!inspecting() || coarse) return;
