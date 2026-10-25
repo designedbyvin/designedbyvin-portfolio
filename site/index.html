@@ -2580,7 +2580,8 @@ function drawPictureDisc(img){ return canvasTex(1024,1024,(g,w,h)=>{ const cx=w/
   g.strokeStyle='rgba(0,0,0,.55)'; g.lineWidth=3; g.beginPath(); g.arc(cx,cy,lr,0,Math.PI*2); g.stroke(); // the label's pressed edge
   g.fillStyle='rgba(15,15,17,.85)'; g.beginPath(); g.arc(cx,cy,13,0,Math.PI*2); g.fill(); g.fillStyle='#050506'; g.beginPath(); g.arc(cx,cy,9,0,Math.PI*2); g.fill(); }); }
 function updateRecordArt(i){ if(i===REC_ART.for) return; REC_ART.for=i;
-  const show=tx=>{ recordMat.map=tx; recordMat.needsUpdate=true; if(window.wakeRoom) window.wakeRoom(); };
+  const show=tx=>{ // the record player's meshes get their own copies of the material (for hover glow), so update the ones actually drawn
+    new Set([recordMat,recDisc.material[1],outDisc.material[1],outDisc.material[2]]).forEach(m=>{ if(m && m.map!==tx){ m.map=tx; m.needsUpdate=true; } }); if(window.wakeRoom) window.wakeRoom(); };
   const tr=(typeof TRACKS!=='undefined' && i>=0)?TRACKS[i]:null; if(!tr || !tr.cover){ show(recordT); return; }
   if(REC_ART.cache[i]){ show(REC_ART.cache[i]); return; }
   const img=new Image(); img.onload=()=>{ try{ const tx=drawPictureDisc(img); tx.anisotropy=aniso; REC_ART.cache[i]=tx; if(REC_ART.for===i) show(tx); }catch(e){ if(REC_ART.for===i) show(recordT); } };
