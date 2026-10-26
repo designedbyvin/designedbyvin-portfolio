@@ -856,7 +856,12 @@ idxBtn.onclick=()=>{ const open=idxList.hidden; idxList.hidden=!open; idxBtn.set
 /* ---------- 3D ---------- */
 let renderer;
 try{ if(!window.THREE) throw 0; renderer=new THREE.WebGLRenderer({canvas,antialias:(window.devicePixelRatio||1)<1.5, /* high-density screens (most laptops, tablets) are sharp enough without costly multisampling */powerPreference:'high-performance'}); /* laptops with two GPUs use the stronger one */ }
-catch(e){ app.classList.add('no-webgl'); }
+catch(e){ app.classList.add('no-webgl');
+  // say why, so the visitor knows what to do: Chrome stops giving a site 3D graphics for the rest of the session after the graphics have crashed a few times
+  try{ const fb=document.querySelector('.fallback'); if(fb){ const ok=(()=>{ try{ const c=document.createElement('canvas'); return !!(c.getContext('webgl2')||c.getContext('webgl')); }catch(_){ return false; } })();
+    fb.textContent=!window.THREE?'The 3D room didn’t finish downloading. Please reload the page, or use Navigation to browse.'
+      :ok?'The 3D room couldn’t start. Please reload the page, or use Navigation to browse.'
+      :'Your browser has paused 3D graphics for now. Quit the browser completely and open it again, or use Navigation to browse.'; } }catch(_){} }
 
 if(!renderer){ hideLoader(); return; } // Index still opens every panel
 // if the browser drops the 3D context (sleep, GPU switch, memory pressure), textures come back corrupted: start fresh instead
@@ -868,7 +873,7 @@ const LOW_GPU=SOFT_GPU || (()=>{ try{ const gl=renderer.getContext(), ext=gl.get
 const PERF={}; const perfMark=k=>{ PERF[k]=Math.round(performance.now()); }; let PERF_BOX=null;
 function perfShow(){ if(!PERF_BOX) return; PERF_BOX.textContent=Object.entries(PERF).map(([k,v])=>k.padEnd(10)+v+' ms').join('\n')+(SOFT_GPU?'\nsoftware graphics':'')+'\n'+(()=>{ try{ const gl=renderer.getContext(), ext=gl.getExtension('WEBGL_debug_renderer_info'); return ext?String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)).slice(0,60):''; }catch(e){ return ''; } })(); }
 perfMark('scripts');
-renderer.domElement.addEventListener('webglcontextlost',e=>{ e.preventDefault(); },false);
+renderer.domElement.addEventListener('webglcontextlost',e=>{ e.preventDefault(); try{ console.warn('[room] graphics context lost'); }catch(_){} },false);
 renderer.domElement.addEventListener('webglcontextrestored',()=>{ location.reload(); },false);
 const PR_BASE=SOFT_GPU?1:Math.min(window.devicePixelRatio||1,LOW_GPU?1.25:(window.matchMedia('(pointer: coarse)').matches?1.75:2)), PR_READ=Math.min(window.devicePixelRatio||1,2); let PR=PR_BASE; renderer.setPixelRatio(PR);
 renderer.outputEncoding=THREE.sRGBEncoding;
