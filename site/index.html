@@ -690,12 +690,15 @@ ldClock(); const ldClockTick=setInterval(()=>{ const l=document.getElementById('
 // once loading runs past the usual 5 seconds, a friendly line under the progress bar explains, changing every 4 seconds until the room appears
 const LD_MSGS=['Please wait while I let you into my room','Visiting for the first time takes a little longer','Your browser is getting to know the room','Next time, it opens much faster','Setting up the desk, one moment','Almost there, switching on the lamp'];
 let ldMsgTimer=0;
-setTimeout(()=>{ const l=document.getElementById('loader'), st=document.getElementById('ld-steps'), li=st&&st.children[2]; if(!l||!li||l.classList.contains('done')) return;
+const ldMsgWait=setInterval(()=>{ const l=document.getElementById('loader'), st=document.getElementById('ld-steps'), li=st&&st.children[2];
+  if(!l||!li||l.classList.contains('done')){ clearInterval(ldMsgWait); return; }
+  if(performance.now()<5500 || li.className!=='on') return; // only once loading is past the usual 5 s and has reached the third step
+  clearInterval(ldMsgWait);
   // the messages take the place of the third step, "Switching on the lamp", while it waits
   li.textContent=''; const m=document.createElement('span'); m.className='ld-msg'; m.setAttribute('aria-live','polite'); li.appendChild(m);
   let k=0; m.textContent=LD_MSGS[0];
   ldMsgTimer=setInterval(()=>{ if(l.classList.contains('done')){ clearInterval(ldMsgTimer); return; } m.classList.add('out');
-    setTimeout(()=>{ k=(k+1)%LD_MSGS.length; m.textContent=LD_MSGS[k]; m.classList.remove('out'); },350); },4000); },5500); // just after the usual 5-second loader, so a normal load never flashes it
+    setTimeout(()=>{ k=(k+1)%LD_MSGS.length; m.textContent=LD_MSGS[k]; m.classList.remove('out'); },350); },4000); },400); // checked a few times a second
 function hideLoader(){ clearInterval(ldMsgTimer); const l=document.getElementById('loader'); if(!l||l.classList.contains('done')) return; l.classList.add('done'); setTimeout(()=>{ l.hidden=true; },800); }
 setLoad(0.03,'Loading');
 // the bar fills evenly over the fixed 5-second loading screen
