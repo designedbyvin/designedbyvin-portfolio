@@ -40,8 +40,6 @@ img{max-width:100%}
 
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://cdnjs.cloudflare.com">
-<link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+JP:wght@400&family=Caveat:wght@400&family=Tinos:wght@400&display=swap">
 <style>
@@ -456,7 +454,7 @@ body{background:#14120F;color:var(--ink);font-family:var(--body);overflow:hidden
       </div>
     </div>
   </div>
-  <p class="fallback">This browser can't show the 3D room. Use Navigation to browse.</p>
+  <p class="fallback">The 3D room couldn't start in this browser. Try reloading the page, or use Navigation to browse.</p>
 
   <div class="chrome">
     <div class="name">
@@ -507,20 +505,9 @@ body{background:#14120F;color:var(--ink);font-family:var(--body);overflow:hidden
   document.querySelector('meta[name=viewport]').setAttribute('content','width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover');
 })();
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/lights/RectAreaLightUniformsLib.js"></script>
+<script src="vendor/three-r128.js"></script><!-- the 3D engine (three.js r128 and its add-ons), served from this site: no outside library to wait on or be blocked -->
 <script>window.VIN_SHOTS={"do": "images/do.jpg", "save": "images/save.jpg", "job": "images/job.jpg", "cal": "images/cal.jpg", "jobs": "images/jobs.jpg", "ref1": "images/ref1.jpg", "ref2": "images/ref2.jpg", "ia": "images/ia.jpg", "flow": "images/flow.jpg", "before": "images/before.jpg", "e_dash": "images/e_dash.jpg", "e_job": "images/e_job.jpg", "e_analytics": "images/e_analytics.jpg"};window.VIN_SHOT_IMG={};window.VIN_SHOT_P=Promise.all(Object.entries(window.VIN_SHOTS).map(([k,src])=>new Promise(r=>{const im=new Image();im.decoding="async";im.onload=()=>{window.VIN_SHOT_IMG[k]=im;r();};im.onerror=()=>r();im.src=src;})));</script>
 <script>window.VIN_PHOTOS={"moto": {"src": "photos/moto.jpg", "w": 800, "h": 600}, "gym": {"src": "photos/gym.jpg", "w": 600, "h": 800}, "sg": {"src": "photos/sg.jpg", "w": 800, "h": 533}, "light": {"src": "photos/light.jpg", "w": 600, "h": 800}, "jewel": {"src": "photos/jewel.jpg", "w": 508, "h": 800}};</script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/BokehShader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/FXAAShader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/MaskPass.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/BokehPass.js"></script>
 <script>
 (function(){
 /* =====================================================================
