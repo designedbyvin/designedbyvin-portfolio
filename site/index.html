@@ -3138,6 +3138,84 @@ function osWindow(g,R,x,y,w,h,title,k){ // a light app window with a title bar; 
   R.push({id:'close',x:x+(k?12:8),y:y+4,w:k?28:20,h:tb-8,act:()=>{ OS.win=null; }});
   g.fillStyle='#6B6F78'; g.font=`500 ${k?15:10}px "Instrument Sans", sans-serif`; g.textAlign='center'; g.fillText(title,x+w/2,cy+(k?5:3.5)); g.textAlign='left';
   return y+tb; }
+/* each app on the desktop gets its own window, in its own colours, with what's true about it so far */
+const APP_INFO={
+  do:{ c1:'#2F55C6', c2:'#1F3C99', tag:'Find your way. Do what’s next.', art:'shot',
+    stats:[['21','installs by 22 Oct 2026'],['4','countries']],
+    chips:['Chrome extension','Web app','No account','Data stays on your device'] },
+  so:{ c1:'#7A2A3A', c2:'#55182A', tag:'We create the foundation, so you can build.', art:'flow', status:'In progress',
+    chips:['Structure first','Information architecture','Low-fi screens','Spec file'] },
+  hris:{ c1:'#1F4A44', c2:'#123430', tag:'An HR information system for enterprise teams.', art:'org', status:'Case study in progress',
+    chips:['Enterprise','Redesign','Product design'] },
+  ikigai:{ c1:'#5B6E3A', c2:'#3F4F25', tag:'生き甲斐 · a reason for being', art:'journal', status:'Live · Side project',
+    chips:['Personal journal','Lives in your browser','No account, no cloud'] } };
+function appArt(g,id,info,x,y,w,h){ // the right-hand picture for each app
+  g.save(); rr(g,x,y,w,h,18); g.clip();
+  if(info.art==='shot' && PREVIEW[id]){ g.fillStyle=info.c1; g.fillRect(x,y,w,h); const iw=w, ih=iw*400/640; g.drawImage(PREVIEW[id],x,y+(h-ih)/2,iw,ih); g.restore(); return; }
+  const bg=g.createLinearGradient(x,y,x+w,y+h); bg.addColorStop(0,'#FBF9F5'); bg.addColorStop(1,'#F1EDE6'); g.fillStyle=bg; g.fillRect(x,y,w,h);
+  if(info.art==='flow'){ // Sō: what you give it, and what it makes
+    const steps=[['Objective & features','What you want to build'],['Information architecture','Generated, then refined'],['Low-fi screens','The structure, on screen'],['System specifications','A file to design or build from']];
+    const bw=w*0.62, bh=h*0.14, gap=(h-bh*4-h*0.12)/3; let by=y+h*0.06;
+    steps.forEach(([tl,sb],i)=>{ const bx=x+(i%2?w-bw-w*0.07:w*0.07);
+      g.save(); g.shadowColor='rgba(60,20,30,.12)'; g.shadowBlur=14; g.shadowOffsetY=4; rr(g,bx,by,bw,bh,12); g.fillStyle='#FFFFFF'; g.fill(); g.restore();
+      g.fillStyle=info.c1; rr(g,bx,by,8,bh,4); g.fill();
+      g.beginPath(); g.arc(bx+34,by+bh/2,15,0,Math.PI*2); g.fillStyle=info.c1; g.fill(); g.fillStyle='#fff'; g.font='700 16px "Instrument Sans", sans-serif'; g.textAlign='center'; g.fillText(String(i+1),bx+34,by+bh/2+6); g.textAlign='left';
+      g.fillStyle='#1E1C19'; g.font='600 19px "Instrument Sans", sans-serif'; g.fillText(tl,bx+62,by+bh/2-3);
+      g.fillStyle='#8A8278'; g.font='400 15px "Instrument Sans", sans-serif'; g.fillText(sb,bx+62,by+bh/2+18);
+      if(i<3){ const nx=x+((i+1)%2?w-bw-w*0.07:w*0.07), fx=bx+bw/2, tx=nx+bw/2, y1=by+bh, y2=by+bh+gap;
+        g.strokeStyle=info.c1; g.globalAlpha=.55; g.lineWidth=2; g.setLineDash([6,6]); g.beginPath(); g.moveTo(fx,y1+4); g.bezierCurveTo(fx,y1+gap*0.6,tx,y2-gap*0.6,tx,y2-6); g.stroke(); g.setLineDash([]); g.globalAlpha=1;
+        g.fillStyle=info.c1; g.beginPath(); g.moveTo(tx-6,y2-12); g.lineTo(tx+6,y2-12); g.lineTo(tx,y2-4); g.fill(); }
+      by+=bh+gap; });
+  } else if(info.art==='org'){ // HRIS: an abstract people directory (no real data)
+    g.fillStyle=info.c1; g.fillRect(x,y,w*0.2,h); g.fillStyle='rgba(255,255,255,.18)'; for(let i=0;i<6;i++){ rr(g,x+w*0.03,y+h*0.12+i*h*0.09,w*0.14,h*0.035,6); g.fill(); }
+    const cx=x+w*0.25, cw=w*0.7; g.fillStyle='#1E1C19'; g.font='700 22px "Bricolage Grotesque", sans-serif'; g.fillText('People',cx,y+h*0.12);
+    [['#E6EFE9','#1F4A44'],['#F3EBDD','#8A6A2E'],['#E8ECF4','#2F4F8C']].forEach(([b,c],i)=>{ const sx=cx+i*(cw/3), sw=cw/3-14; rr(g,sx,y+h*0.17,sw,h*0.15,10); g.fillStyle=b; g.fill(); g.fillStyle=c; rr(g,sx+14,y+h*0.21,sw*0.34,h*0.045,5); g.fill(); g.globalAlpha=.4; rr(g,sx+14,y+h*0.27,sw*0.6,h*0.02,4); g.fill(); g.globalAlpha=1; });
+    for(let r=0;r<5;r++){ const ry=y+h*0.38+r*h*0.115; g.fillStyle=r%2?'#FFFFFF':'#F7F5F1'; rr(g,cx,ry,cw,h*0.095,8); g.fill();
+      g.fillStyle=['#C9D8D2','#E3D3B8','#CBD3E6','#D8C9D6','#D2DCC6'][r]; g.beginPath(); g.arc(cx+28,ry+h*0.0475,15,0,Math.PI*2); g.fill();
+      g.fillStyle='#BDB6AB'; rr(g,cx+56,ry+h*0.03,cw*0.26,9,4); g.fill(); g.fillStyle='#DAD4CA'; rr(g,cx+56,ry+h*0.058,cw*0.18,7,3); g.fill();
+      g.fillStyle='#DAD4CA'; rr(g,cx+cw*0.5,ry+h*0.04,cw*0.18,8,4); g.fill(); g.fillStyle=r===1?'#F4D9A8':'#CFE3D7'; rr(g,cx+cw-110,ry+h*0.028,84,h*0.04,h*0.02); g.fill(); }
+  } else if(info.art==='journal'){ // Ikigai: a page of the journal
+    g.fillStyle='#FFFDF6'; g.fillRect(x,y,w,h); g.fillStyle='rgba(91,110,58,.08)'; g.fillRect(x,y,w*0.08,h);
+    g.fillStyle=info.c1; g.globalAlpha=.07; g.font='700 64px "Noto Serif JP", serif'; g.textAlign='right'; g.fillText('生き甲斐',x+w-24,y+h-24); g.textAlign='left'; g.globalAlpha=1;
+    g.fillStyle='#8A8278'; g.font='500 14px "JetBrains Mono", monospace'; g.fillText('TODAY',x+w*0.13,y+h*0.12);
+    g.fillStyle='#2A2622'; g.font='400 34px "Caveat", cursive'; g.fillText('Small wins, written down.',x+w*0.13,y+h*0.22);
+    g.strokeStyle='rgba(91,110,58,.18)'; g.lineWidth=1.2; for(let i=0;i<8;i++){ const ly=y+h*0.32+i*h*0.075; g.beginPath(); g.moveTo(x+w*0.13,ly); g.lineTo(x+w*0.92,ly); g.stroke(); }
+    g.strokeStyle='rgba(42,38,34,.55)'; g.lineWidth=2.2; g.lineCap='round';
+    [0.78,0.62,0.86,0.5,0.7].forEach((len,i)=>{ const ly=y+h*0.32+i*h*0.075-8; g.beginPath(); g.moveTo(x+w*0.14,ly); for(let px=0;px<len*w*0.76;px+=14) g.lineTo(x+w*0.14+px,ly+Math.sin(px*0.21+i)*2.2); g.stroke(); });
+    g.strokeStyle=info.c1; g.lineWidth=4; g.beginPath(); g.moveTo(x+w*0.62,y+h*0.86); g.quadraticCurveTo(x+w*0.72,y+h*0.78,x+w*0.82,y+h*0.84); g.stroke();
+    g.fillStyle='#D9822B'; g.beginPath(); g.arc(x+w*0.845,y+h*0.83,6,0,Math.PI*2); g.fill(); }
+  g.restore(); }
+function drawAppWindow(g,R,id,x,y,w,h){ const p=PROJECTS.find(q=>q.id===id)||SIDE_APPS.find(q=>q.id===id), info=APP_INFO[id]; if(PROJECTS.includes(p)) OS.sel=PROJECTS.indexOf(p);
+  { // measure first, so the window is only as tall as what's in it
+    const colW=Math.min(640,w*0.48), aw=x+w-56-(x+56+colW+48); g.font='400 23px "Instrument Sans", sans-serif';
+    let lh=lines(g,p.summary,colW).length*23*1.5+20+(info.stats?110:0); g.font='500 15px "Instrument Sans", sans-serif'; let cx=0, rows=1; info.chips.forEach(c=>{ const cw=g.measureText(c).width+30; if(cx+cw>colW){ cx=0; rows++; } cx+=cw+10; });
+    lh+=rows*44+16+54; const need=46+196+40+Math.max(lh,aw*0.68)+48; h=Math.min(h,need); }
+  const cTop=osWindow(g,R,x,y,w,h,p.name,true);
+  // a band in the app's own colour
+  const bandH=196, band=g.createLinearGradient(x,cTop,x+w,cTop+bandH); band.addColorStop(0,info.c1); band.addColorStop(1,info.c2);
+  g.save(); g.beginPath(); g.rect(x,cTop,w,bandH); g.clip(); g.fillStyle=band; g.fillRect(x,cTop,w,bandH);
+  g.restore();
+  const x0=x+56; let yy=cTop+46;
+  if(APP_ICON[id]){ const isz=96; g.save(); g.shadowColor='rgba(0,0,0,.25)'; g.shadowBlur=18; g.shadowOffsetY=6; rr(g,x0,yy,isz,isz,isz*.225); g.fillStyle='#fff'; g.fill(); g.restore(); g.save(); rr(g,x0,yy,isz,isz,isz*.225); g.clip(); g.drawImage(APP_ICON[id],x0,yy,isz,isz); g.restore(); }
+  const tx=x0+124; g.fillStyle='rgba(255,255,255,.72)'; g.font='500 15px "JetBrains Mono", monospace'; g.fillText(p.sub.toUpperCase(),tx,yy+16);
+  g.fillStyle='#FFFFFF'; g.font='700 58px "Bricolage Grotesque", sans-serif'; g.fillText(p.name,tx,yy+70);
+  g.fillStyle='rgba(255,255,255,.86)'; g.font='400 21px "Instrument Sans", sans-serif'; g.fillText(info.tag,tx,yy+102);
+  const st=p.status||info.status; if(st){ g.font='600 14px "Instrument Sans", sans-serif'; const sw=g.measureText(st).width+38; rr(g,x+w-56-sw,cTop+30,sw,32,16); g.fillStyle='rgba(255,255,255,.18)'; g.fill(); g.fillStyle='#7CF0A6'; if(!/live/i.test(st)) g.fillStyle='#FFD58A'; g.beginPath(); g.arc(x+w-56-sw+17,cTop+46,5,0,Math.PI*2); g.fill(); g.fillStyle='#FFFFFF'; g.fillText(st,x+w-56-sw+28,cTop+51); }
+  // body: what it is, the numbers, its traits, and where to go next; the picture on the right
+  const by=cTop+bandH+40, colW=Math.min(640,w*0.48), ax=x+56+colW+48, aw=x+w-56-ax, ah=Math.min(h-(by-y)-40,aw*0.68);
+  yy=para(g,p.summary,x0,by,colW,23,1.5,'400 23px "Instrument Sans", sans-serif','#2E2A25')+20;
+  if(info.stats){ const sw=(colW-12*(info.stats.length-1))/info.stats.length; info.stats.forEach(([v,l],i)=>{ const sx=x0+i*(sw+12); rr(g,sx,yy,sw,92,14); g.fillStyle='#F6F4EF'; g.fill(); g.strokeStyle='#E6E1D8'; g.lineWidth=1.2; g.stroke();
+      g.fillStyle=info.c1; g.font='700 34px "Bricolage Grotesque", sans-serif'; g.fillText(v,sx+18,yy+46); g.fillStyle='#6B655D'; g.font='400 14px "Instrument Sans", sans-serif'; g.fillText(l,sx+18,yy+74); }); yy+=110; }
+  g.font='500 15px "Instrument Sans", sans-serif'; let cx=x0; info.chips.forEach(c=>{ const cw=g.measureText(c).width+30; if(cx+cw>x0+colW){ cx=x0; yy+=44; }
+    rr(g,cx,yy,cw,34,17); g.fillStyle=info.c1+'14'; g.fill(); g.strokeStyle=info.c1+'40'; g.lineWidth=1.2; g.stroke(); g.fillStyle=info.c2; g.fillText(c,cx+15,yy+22); cx+=cw+10; }); yy+=60;
+  const bh=54, bf=18; let bx=x0;
+  const btn=(label,bid,primary,act)=>{ g.font=`600 ${bf}px "Instrument Sans", sans-serif`; const bw=g.measureText(label).width+44, hv=OS.hover===bid; rr(g,bx,yy,bw,bh,12);
+    if(primary){ g.fillStyle=hv?info.c2:info.c1; g.fill(); g.fillStyle='#FFFFFF'; } else { g.fillStyle=hv?'#ECE9E3':'#F7F6F3'; g.fill(); g.strokeStyle='#CFCBC4'; g.lineWidth=1.5; g.stroke(); g.fillStyle='#1A1B1E'; }
+    g.fillText(label,bx+22,yy+bh/2+bf*0.36); R.push({id:bid,x:bx,y:yy,w:bw,h:bh,act}); bx+=bw+12; };
+  if(p.open) btn(p.open[0]+' ↗︎','open',true,()=>openLink(p.open[1]));
+  if(!p.noCase) btn('View case study →','case',!p.open,()=>openBookFromMonitor(p.id));
+  if(aw>200){ g.save(); g.shadowColor='rgba(0,0,0,.14)'; g.shadowBlur=26; g.shadowOffsetY=8; rr(g,ax,by-4,aw,ah,18); g.fillStyle='#fff'; g.fill(); g.restore(); appArt(g,id,info,ax,by-4,aw,ah); }
+}
 function drawOS(){ if(window.wakeRoom) window.wakeRoom();
   const s=OS.s, W=OSW/s, H=OSH/s, g=og, R=[], wide=W>=1080, k=wide; OS.regions=R;
   g.setTransform(1,0,0,1,0,0);
@@ -3183,6 +3261,7 @@ function drawOS(){ if(window.wakeRoom) window.wakeRoom();
         g.fillText(part,x+pad,by); caret={x:x+pad+g.measureText(part).width+2, y:by, sz}; });
       ty+=lines(g,t,w-pad*2).length*sz*1.45+(first?fs*.5:fs*.8); });
     if(OS.typing && caret && (performance.now()%900<520)){ g.fillStyle='#2D4FD8'; g.fillRect(caret.x,caret.y-caret.sz*0.82,k?2.5:1.6,caret.sz*0.98); }
+  } else if(OS.win && k && APP_INFO[OS.win]){ drawAppWindow(g,R,OS.win,left,top,W-left-60,H-top-50);
   } else if(OS.win){
     const p=PROJECTS.find(q=>q.id===OS.win)||SIDE_APPS.find(q=>q.id===OS.win); if(PROJECTS.includes(p)) OS.sel=PROJECTS.indexOf(p);
     const x=left, y=top, w=W-x-(k?60:12), h=H-y-(k?50:12);
