@@ -506,10 +506,10 @@ body{background:#14120F;color:var(--ink);font-family:var(--body);overflow:hidden
 })();
 </script>
 <script src="vendor/three-r128.js"></script><!-- the 3D engine (three.js r128 and its add-ons), served from this site: no outside library to wait on or be blocked -->
-<script>window.VIN_SHOTS={"do": "images/do.jpg", "save": "images/save.jpg", "job": "images/job.jpg", "cal": "images/cal.jpg", "jobs": "images/jobs.jpg", "ref1": "images/ref1.jpg", "ref2": "images/ref2.jpg", "ia": "images/ia.jpg", "flow": "images/flow.jpg", "before": "images/before.jpg", "e_dash": "images/e_dash.jpg", "e_job": "images/e_job.jpg", "e_analytics": "images/e_analytics.jpg"};window.VIN_SHOT_IMG={};window.VIN_SHOT_P=Promise.all(Object.entries(window.VIN_SHOTS).map(([k,src])=>new Promise(r=>{const im=new Image();im.decoding="async";im.onload=()=>{window.VIN_SHOT_IMG[k]=im;r();};im.onerror=()=>r();im.src=src;})));</script>
+<script>window.VIN_SHOTS={"do": "images/do.jpg", "save": "images/save.jpg", "job": "images/job.jpg", "cal": "images/cal.jpg", "jobs": "images/jobs.jpg", "ref1": "images/ref1.jpg", "ref2": "images/ref2.jpg", "ia": "images/ia.jpg", "flow": "images/flow.jpg", "before": "images/before.jpg", "e_dash": "images/e_dash.jpg", "e_job": "images/e_job.jpg", "e_analytics": "images/e_analytics.jpg", "hris": "images/hris.jpg", "h_nav": "images/h_nav.jpg", "h_dash_old": "images/h_dash_old.jpg", "h_dash_new": "images/h_dash_new.jpg", "h_dash3": "images/h_dash3.jpg", "h_imp_old": "images/h_imp_old.jpg", "h_imp_match": "images/h_imp_match.jpg", "h_imp_prog": "images/h_imp_prog.jpg", "h_imp_res": "images/h_imp_res.jpg", "h_tbl_old": "images/h_tbl_old.jpg", "h_tbl_new": "images/h_tbl_new.jpg"};window.VIN_SHOT_IMG={};window.VIN_SHOT_P=Promise.all(Object.entries(window.VIN_SHOTS).map(([k,src])=>new Promise(r=>{const im=new Image();im.decoding="async";im.onload=()=>{window.VIN_SHOT_IMG[k]=im;r();};im.onerror=()=>r();im.src=src;})));</script>
 <script>window.VIN_PHOTOS={"moto": {"src": "photos/moto.jpg", "w": 800, "h": 600}, "gym": {"src": "photos/gym.jpg", "w": 600, "h": 800}, "sg": {"src": "photos/sg.jpg", "w": 800, "h": 533}, "light": {"src": "photos/light.jpg", "w": 600, "h": 800}, "jewel": {"src": "photos/jewel.jpg", "w": 508, "h": 800}};</script>
 <script>
-(function(){
+(async function(){
 /* =====================================================================
    CONTENT — edit here. Anything wrapped in todo('…') shows as a dashed
    "To add" note until you replace it with real content.
@@ -530,8 +530,8 @@ const PROJECTS = [
     summary:'A structure-first product design tool for defining information architecture, requirements and low-fidelity screens before visual design.',
     status:null, open:null },
   { id:'hris', name:'Enterprise HRIS', sub:'Enterprise product design',
-    summary:'Enterprise HR information system redesign and product design work.',
-    status:null, open:null }
+    summary:'A redesign of an enterprise HR information system: clearer navigation, a dashboard that leads with the key numbers, and safer imports.',
+    status:'Live, used by the client', open:null }
 ];
 
 // full case-study pages, opened only from "View case study"
@@ -622,9 +622,58 @@ const CASES = {
     facts:[['Role','—'],['Platform','—'],['Timeline','—'],['Status','—']],
     sections:[['Why structure first','<p>Sō helps designers settle the information architecture, the requirements and low-fidelity structure of a product before any visual design starts.</p>'],['Process',todo('Research, key flows, how IA, requirements and low-fi screens connect, and design decisions.')],['Outcome',todo('Results, what you learned, and images.')]] },
   hris:{ kicker:'Case study · Enterprise product design', title:'Enterprise HRIS',
-    lede:'Enterprise HR information system redesign and product design work.',
-    facts:[['Role','—'],['Scope','—'],['Timeline','—'],['Team','—']],
-    sections:[['Overview',todo('The organisation (anonymised if needed), the users, and the scope of the redesign.')],['Process',todo('How you worked with stakeholders, the main modules or flows, and design system decisions.')],['Outcome',todo('Impact, adoption, and screens you are allowed to show.')]] }
+    lede:'A redesign of an enterprise HR information system: clearer navigation, a dashboard that leads with the key numbers, and an import flow that catches errors before they happen.',
+    facts:[['Role','Lead designer'],['Timeline','Late 2025 – mid 2026'],['Team','Design team of 3'],['Status','Live, used by the client']],
+    sections:[],
+    noEnd:true,
+    bookSpreads:['Hero','Overview & problem','Goals & navigation','Dashboard','Dashboard & import','Import','Request table','Decisions & visual system','Outcome & reflection'],
+    bookPages:[
+      [{t:'kicker',text:'HRIS · 01  Overview'},{t:'h',text:'Redesigning an enterprise HR system'},{t:'gap',h:8},
+       {t:'p',text:'An HR information system that HR teams use to manage the organisation, attendance and employee requests. I led the redesign of how it looks and works.'},{t:'gap',h:24},
+       {t:'rows',items:[['For','HR administrators and staff'],['My role','Lead designer: UX, UI and the design system, leading a design team of 3'],['Worked with','Developers, business analysts, the project manager and QA'],['Timeline','Late 2025 to mid 2026'],['Status','Live and used by the client']]}],
+      [{t:'kicker',text:'HRIS · 02  The problem'},{t:'h',text:'A system that outgrew its layout'},{t:'gap',h:8},
+       {t:'p',text:'The system did a lot, but its screens made people work to find things and to trust what they saw.'},{t:'gap',h:14},
+       {t:'rows',items:[['Navigation','One long three-level tree. Opening a module pushed the rest of the menu off the screen.'],['Dashboard','Collapsed sections showing one chart at a time, with no summary up front'],['Import','Three steps, and mistakes only showed up at the very end'],['Tables','Small, inconsistent status labels and action icons that were hard to tell apart']]}],
+      [{t:'kicker',text:'HRIS · 03  Goals'},{t:'h',text:'Same features, easier to use'},{t:'gap',h:14},
+       {t:'flow',items:[['Find pages faster','search and focused menus'],['Lead with the key numbers','summary before detail'],['Catch errors before importing','match columns first'],['Make status obvious','say who acted']]},
+       {t:'p',text:'The screens in this case study are anonymised recreations: client names, people, numbers and some terms have been changed, and the colours are shifted.'}],
+      [{t:'kicker',text:'HRIS · 04  Navigation'},{t:'h',text:'From a long tree to focused menus'},
+       {t:'ui',key:'h_nav',caption:'Before: one tree. After: main modules, a module’s own menu, and a collapsed icon rail.'},
+       {t:'rows',items:[['What changed','Pick a module and see only its pages, with a back arrow · search modules · an icon for every page · the menu collapses to icons']]}],
+      [{t:'kicker',text:'HRIS · 05  Dashboard'},{t:'h',text:'Before: one chart at a time'},
+       {t:'ui',key:'h_dash_old',caption:'Old dashboard: collapsed sections, one chart open, paging arrows'},
+       {t:'rows',items:[['Problem','You had to open each section, and page through each chart, to learn anything']]}],
+      [{t:'kicker',text:'HRIS · Dashboard, continued'},{t:'h',text:'After: the key numbers first'},
+       {t:'ui',key:'h_dash_new',caption:'New dashboard: headline figures, one set of filters, charts in cards'},
+       {t:'rows',items:[['Why','HR needs headcount, hires, separations and turnover at a glance'],['Result','Four headline figures up front; the filters apply to the whole page']]}],
+      [{t:'kicker',text:'HRIS · Dashboard, continued'},{t:'h',text:'Charts that explain themselves'},
+       {t:'ui',key:'h_dash3',caption:'Every chart has a title, a one-line description and its own download'},
+       {t:'rows',items:[['Chart choice','Donuts for share of a whole, bars for spread across ranges']]}],
+      [{t:'kicker',text:'HRIS · 06  Import'},{t:'h',text:'Before: errors at the very end'},
+       {t:'ui',key:'h_imp_old',caption:'Old import: three steps, then “Import Unsuccessful! 2 error(s)”'},
+       {t:'rows',items:[['Problem','The file was only checked after you pressed Import, and the result was an error count to dig through']]}],
+      [{t:'kicker',text:'HRIS · Import, continued'},{t:'h',text:'After: match columns first'},
+       {t:'ui',key:'h_imp_match',caption:'A new step pairs each system field with an Excel column'},
+       {t:'rows',items:[['Why','Columns or formats that don’t line up are a common reason imports fail'],['Result','Required fields, live matched and unmatched counts, and Auto-match before anything is imported']]}],
+      [{t:'kicker',text:'HRIS · Import, continued'},{t:'h',text:'Clear progress, fixable errors'},
+       {t:'pair',items:[['h_imp_prog','A real progress bar'],['h_imp_res','Failed rows to download']]},
+       {t:'rows',items:[['What changed','Four steps that show what is done · settings for duplicates and date formats · a “Ready to import?” check · failed records you can fix and import again']]}],
+      [{t:'kicker',text:'HRIS · 07  Request table'},{t:'h',text:'Before: small labels, hidden meaning'},
+       {t:'ui',key:'h_tbl_old',caption:'Old table: filters that need “Go”, small mixed-case labels, tiny icons'},
+       {t:'rows',items:[['Problem','Status didn’t say who acted, and the copy icon was easy to mistake for edit']]}],
+      [{t:'kicker',text:'HRIS · Request table, continued'},{t:'h',text:'After: status says who acted'},
+       {t:'ui',key:'h_tbl_new',caption:'New table: page header and path, labelled filters, clear row actions'},
+       {t:'rows',items:[['What changed','“Approved by Manager” status labels · blue edit and red delete · Delete shows how many rows are selected · sortable columns']]}],
+      [{t:'kicker',text:'HRIS · 08  Design decisions'},{t:'h',text:'Decision, reason, benefit'},{t:'gap',h:8},
+       {t:'decisions',items:[['Menus that drill into one module at a time','A full tree of every module was too long to scan.','About 6 to 14 items on screen instead of 30 or more.'],['Match columns before importing','Errors found after the import are expensive to fix.','Problems are caught while they are still easy to fix.'],['A page header on every screen','People couldn’t tell where they were or what a page was for.','A title, a one-line purpose and the full path on every page.']]}],
+      [{t:'kicker',text:'HRIS · 09  Visual system'},{t:'h',text:'One consistent style'},{t:'gap',h:8},
+       {t:'rows',items:[['Type','One typeface, Poppins, with a clear size scale'],['Colour','One blue for actions and the current page; green, red and amber only for success, error and warning'],['Layout','White cards on a light grey page, with the same spacing everywhere'],['Components','Labelled fields, buttons, status labels, tables and a four-step wizard, reused across modules']]}],
+      [{t:'kicker',text:'HRIS · 10  Outcome'},{t:'h',text:'Live with the client'},{t:'gap',h:8},
+       {t:'rows',items:[['Shipped','The redesigned system is live and used by the client'],['My part','Led the design and a team of 3 designers, from structure and flows to the final UI'],['With','Developers, business analysts, the project manager and QA, from design to release']]},
+       {t:'gap',h:12},{t:'p',text:'Screens shown are anonymised recreations of the real work.'}],
+      [{t:'kicker',text:'HRIS · 11  Reflection'},{t:'h',text:'What I would revisit'},{t:'gap',h:8},
+       {t:'rows',items:[['Module menu','Inside a module you can’t see the others, so switching takes an extra click'],['Icon rail','Several pages share the same calendar icon, so the collapsed menu is hard to tell apart'],['Required tags','Red before you’ve done anything reads like an error; a neutral style would be calmer'],['Page banner','The large banner takes height that data screens need']]}]
+    ] }
 };
 
 const ABOUT = {
@@ -854,6 +903,12 @@ function closeIdx(){ idxList.hidden=true; idxBtn.setAttribute('aria-expanded','f
 idxBtn.onclick=()=>{ const open=idxList.hidden; idxList.hidden=!open; idxBtn.setAttribute('aria-expanded',String(open)); document.body.classList.toggle('idx-open',open); };
 
 /* ---------- 3D ---------- */
+// if the 3D engine didn't arrive (a dropped download, or a host that blocked it), try once more, then the same version from a public CDN
+if(!window.THREE){ const load=src=>new Promise(r=>{ const s=document.createElement('script'); s.src=src; s.onload=s.onerror=()=>r(); document.head.appendChild(s); });
+  await load('vendor/three-r128.js?retry='+Date.now());
+  if(!window.THREE){ await load('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js');
+    if(window.THREE){ const ex='https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/';
+      for(const f of ['shaders/CopyShader','postprocessing/EffectComposer','postprocessing/MaskPass','postprocessing/ShaderPass','postprocessing/RenderPass','shaders/LuminosityHighPassShader','postprocessing/UnrealBloomPass','shaders/BokehShader','postprocessing/BokehPass','shaders/FXAAShader','lights/RectAreaLightUniformsLib']) await load(ex+f+'.js'); } } }
 let renderer;
 try{ if(!window.THREE) throw 0; renderer=new THREE.WebGLRenderer({canvas,antialias:(window.devicePixelRatio||1)<1.5, /* high-density screens (most laptops, tablets) are sharp enough without costly multisampling */powerPreference:'high-performance'}); /* laptops with two GPUs use the stronger one */ }
 catch(e){ app.classList.add('no-webgl');
@@ -3145,7 +3200,7 @@ const APP_INFO={
     chips:['Chrome extension','Web app','No account','Data stays on your device'] },
   so:{ c1:'#7A2A3A', c2:'#55182A', tag:'We create the foundation, so you can build.', art:'flow', status:'In progress',
     chips:['Structure first','Information architecture','Low-fi screens','Spec file'] },
-  hris:{ c1:'#1F4A44', c2:'#123430', tag:'An HR information system for enterprise teams.', art:'org', status:'Case study in progress',
+  hris:{ c1:'#1F4A44', c2:'#123430', tag:'An HR information system for enterprise teams.', art:'org', status:'Live · Used by the client',
     chips:['Enterprise','Redesign','Product design'] },
   ikigai:{ c1:'#5B6E3A', c2:'#3F4F25', tag:'生き甲斐 · a reason for being', art:'journal', status:'Live · Side project',
     chips:['Personal journal','Lives in your browser','No account, no cloud'] } };
